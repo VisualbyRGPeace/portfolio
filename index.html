@@ -104,8 +104,26 @@
   /* Inner layer: visuals + the hover/focus response only (scale + glow).
      This is where a transition is safe, since it only ever changes on
      hover/focus, never on every animation frame. */
+  /* Ambient glow: a blurred, oversized copy of the SAME photo, sitting
+     behind the card. This is what makes the glow look like it's coming
+     from the image itself instead of a flat colored light. */
+  .orbit-card-glow{
+    position:absolute;
+    top:50%; left:50%;
+    width:170%; height:170%;
+    transform:translate(-50%,-50%) scale(0.86);
+    background-size:cover;
+    background-position:center;
+    filter:blur(18px) saturate(1.6) brightness(1.15);
+    opacity:0.55;
+    border-radius:40%;
+    pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease, filter .35s ease;
+    z-index:0;
+  }
   .orbit-card-inner{
     position:relative;
+    z-index:1;
     width:100%; height:100%;
     border-radius:18px;
     overflow:hidden;
@@ -120,10 +138,15 @@
   .orbit-card img{
     width:100%; height:100%; object-fit:cover;
   }
+  .orbit-card:hover .orbit-card-glow,
+  .orbit-card:focus-visible .orbit-card-glow{
+    opacity:0.95;
+    transform:translate(-50%,-50%) scale(1.05);
+    filter:blur(22px) saturate(1.7) brightness(1.2);
+  }
   .orbit-card:hover .orbit-card-inner,
   .orbit-card:focus-visible .orbit-card-inner{
     transform: scale(1.2);
-    box-shadow: 0 0 46px 6px var(--glow);
     filter:saturate(1.15);
   }
   .orbit-card:hover, .orbit-card:focus-visible{ z-index:20; }
@@ -430,6 +453,13 @@ function buildCards(){
     card.className = "orbit-card";
     card.style.setProperty("--glow", item.glow);
     card.tabIndex = 0;
+
+    // Glow layer: same photo as the card, shown blurred and oversized
+    // behind it, so the glow color/light comes from the image itself.
+    const glow = document.createElement("div");
+    glow.className = "orbit-card-glow";
+    glow.style.backgroundImage = `url("${item.src}")`;
+    card.appendChild(glow);
 
     const inner = document.createElement("div");
     inner.className = "orbit-card-inner";
