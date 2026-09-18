@@ -97,7 +97,7 @@
     position:absolute;
     top:0; left:0;
     width:clamp(58px, 9.5vw, 104px);
-    aspect-ratio:3/4;
+    aspect-ratio:1/1;
     transform: translate(-50%,-50%) rotate(var(--angle,0deg));
     cursor:pointer;
   }
@@ -456,18 +456,23 @@ function buildCards(){
 /* Positions + rotates every card for the CURRENT rotationOffset.
    Every card shares the same offset and only differs by its fixed
    baseAngle, so the whole ring always moves and holds together as
-   one rigid system — no card is ever animated independently. */
+   one rigid system — no card is ever animated independently.
+   Everything is written as a single `transform` (translate + rotate)
+   instead of left/top, so the browser can composite it on the GPU
+   each frame instead of re-computing layout for 12 elements — this
+   is what keeps the rotation jitter-free. */
 function render(){
   cardEls.forEach(({ el, baseAngle }) => {
     const angleDeg = baseAngle + rotationOffset;
     const angleRad = angleDeg * Math.PI / 180;
     const x = geo.cx + geo.radius * Math.sin(angleRad);
     const y = geo.cy - geo.radius * Math.cos(angleRad);
-    el.style.left = x + "px";
-    el.style.top = y + "px";
-    // Rotating by the exact same angle as the position keeps the
-    // card's bottom edge tangent to the circle at every point.
-    el.style.setProperty("--angle", angleDeg + "deg");
+    // translate(x,y) places the card's center at its circle point;
+    // translate(-50%,-50%) accounts for left:0/top:0 being the box's
+    // own top-left corner; rotate() keeps the bottom edge tangent to
+    // the circle — same geometry as before, just composited as one
+    // transform for a smooth, constant-speed rotation.
+    el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${angleDeg}deg)`;
   });
 }
 
