@@ -77,35 +77,42 @@
   .hero{
     position:relative;
     min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
     padding:140px 20px 80px;
+    overflow:hidden; /* cards that rotate past the visible arc are hidden, not clipped abruptly mid-card */
   }
+  /* .orbit is the "stage": a full-bleed layer whose coordinate system
+     is used to compute the circle in JS. The circle's center sits
+     BELOW this box (see the script); cards travel all the way around
+     that circle as one rigid ring, so only the upper portion is ever
+     visible — like the top of a slowly turning wheel. */
   .orbit{
-    position:relative;
-    width:min(640px, 92vw);
-    aspect-ratio:1/1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    position:absolute;
+    inset:0;
   }
+  /* Outer wrapper: POSITION + ROTATION only. Left/top/--angle are
+     rewritten every animation frame by the script, so this element
+     deliberately has NO transition — that keeps the continuous
+     rotation perfectly smooth instead of fighting a CSS transition. */
   .orbit-card{
     position:absolute;
-    top:50%; left:50%;
-    width:clamp(64px, 11vw, 108px);
+    top:0; left:0;
+    width:clamp(58px, 9.5vw, 104px);
     aspect-ratio:3/4;
-    border-radius:20px;
+    transform: translate(-50%,-50%) rotate(var(--angle,0deg));
+    cursor:pointer;
+  }
+  /* Inner layer: visuals + the hover/focus response only (scale + glow).
+     This is where a transition is safe, since it only ever changes on
+     hover/focus, never on every animation frame. */
+  .orbit-card-inner{
+    position:relative;
+    width:100%; height:100%;
+    border-radius:18px;
     overflow:hidden;
     background:#15151d center/cover no-repeat;
-    transform: translate(-50%,-50%) rotate(var(--tilt,0deg)) translate(var(--dist,0px)) rotate(calc(-1 * var(--tilt,0deg)));
-    box-shadow:0 0 0 rgba(0,0,0,0);
-    transition: transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease, filter .5s ease;
-    cursor:pointer;
-    animation: float 7s ease-in-out infinite;
-    animation-delay: var(--delay, 0s);
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, filter .35s ease;
   }
-  .orbit-card::after{
+  .orbit-card-inner::after{
     content:'';
     position:absolute; inset:0;
     background:linear-gradient(160deg, transparent 40%, rgba(0,0,0,.35));
@@ -113,25 +120,26 @@
   .orbit-card img{
     width:100%; height:100%; object-fit:cover;
   }
-  .orbit-card:hover, .orbit-card:focus-visible{
-    transform: translate(-50%,-50%) rotate(var(--tilt,0deg)) translate(var(--dist,0px)) rotate(calc(-1 * var(--tilt,0deg))) scale(1.22);
+  .orbit-card:hover .orbit-card-inner,
+  .orbit-card:focus-visible .orbit-card-inner{
+    transform: scale(1.2);
     box-shadow: 0 0 46px 6px var(--glow);
     filter:saturate(1.15);
-    z-index:20;
   }
-
-  @keyframes float{
-    0%, 100%{ margin-top:0px; }
-    50%{ margin-top:-10px; }
-  }
+  .orbit-card:hover, .orbit-card:focus-visible{ z-index:20; }
 
   .hero-content{
-    position:relative;
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
     z-index:10;
     text-align:center;
     max-width:420px;
+    width:100%;
     padding:0 16px;
+    pointer-events:none;
   }
+  .hero-content .btn{ pointer-events:auto; }
   .hero-content h1{
     font-size:clamp(26px, 4.4vw, 40px);
     font-weight:600;
@@ -365,7 +373,7 @@
 
 <script>
 /* =========================================================
-   1) CIRCULAR GALLERY (hero)
+   1) CIRCULAR GALLERY (hero) — a rotating ring of 12 cards
    Điền ảnh của bạn vào mảng bên dưới.
    - src: đường dẫn ảnh (ví dụ "images/photo1.jpg" trong repo của bạn)
    - glow: màu phát sáng khi hover (mã hex)
@@ -388,34 +396,108 @@ const orbitImages = [
 const orbit = document.getElementById("orbit");
 const n = orbitImages.length;
 
-function layoutOrbit(){
-  const size = orbit.clientWidth;
-  const radius = size * 0.46;
+/* Geometry knobs. The 12 cards sit EVENLY around a full circle
+   (360 / 12 = 30deg apart), whose center is below the composition —
+   only the upper part of that circle is ever inside the visible
+   .hero box (which clips overflow), so it reads as an arc while
+   really being a full ring underneath. */
+const CENTER_Y_RATIO = 0.86; // circle center's vertical position, as a fraction of stage height (below the middle)
+const RADIUS_RATIO   = 0.66; // circle radius, as a fraction of the stage's shorter side
+const DEG_PER_SECOND = 3.2;  // rotation speed — slow and continuous
+
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let geo = { cx: 0, cy: 0, radius: 0 };
+const cardEls = []; // { el, baseAngle }
+let rotationOffset = 0;   // degrees; keeps accumulating, never resets — this is what makes resume seamless
+let hoverCount = 0;       // >0 while the pointer/focus is on any card
+let lastTime = null;
+
+function measure(){
+  const w = orbit.clientWidth;
+  const h = orbit.clientHeight;
+  geo.cx = w / 2;
+  geo.cy = h * CENTER_Y_RATIO;
+  geo.radius = Math.min(w, h) * RADIUS_RATIO;
+}
+
+function buildCards(){
   orbit.innerHTML = "";
+  cardEls.length = 0;
+  const step = 360 / n; // equal angular spacing, all 12 cards, full circle
   orbitImages.forEach((item, i) => {
-    const angle = (360 / n) * i - 90; // start at top, go clockwise
     const card = document.createElement("div");
     card.className = "orbit-card";
-    card.style.setProperty("--tilt", angle + "deg");
-    card.style.setProperty("--dist", radius + "px");
     card.style.setProperty("--glow", item.glow);
-    card.style.setProperty("--delay", (i * 0.35) + "s");
-    card.style.animationDuration = (6 + (i % 3)) + "s";
     card.tabIndex = 0;
 
+    const inner = document.createElement("div");
+    inner.className = "orbit-card-inner";
     const img = document.createElement("img");
     img.src = item.src;
     img.alt = "Portfolio image " + (i + 1);
     img.loading = "lazy";
-    card.appendChild(img);
+    inner.appendChild(img);
+    card.appendChild(inner);
     orbit.appendChild(card);
+
+    // Pause the whole ring while this card is hovered/focused, resume when none are.
+    const enter = () => { hoverCount++; };
+    const leave = () => { hoverCount = Math.max(0, hoverCount - 1); };
+    card.addEventListener("mouseenter", enter);
+    card.addEventListener("mouseleave", leave);
+    card.addEventListener("focus", enter);
+    card.addEventListener("blur", leave);
+
+    cardEls.push({ el: card, baseAngle: i * step });
   });
 }
-layoutOrbit();
+
+/* Positions + rotates every card for the CURRENT rotationOffset.
+   Every card shares the same offset and only differs by its fixed
+   baseAngle, so the whole ring always moves and holds together as
+   one rigid system — no card is ever animated independently. */
+function render(){
+  cardEls.forEach(({ el, baseAngle }) => {
+    const angleDeg = baseAngle + rotationOffset;
+    const angleRad = angleDeg * Math.PI / 180;
+    const x = geo.cx + geo.radius * Math.sin(angleRad);
+    const y = geo.cy - geo.radius * Math.cos(angleRad);
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    // Rotating by the exact same angle as the position keeps the
+    // card's bottom edge tangent to the circle at every point.
+    el.style.setProperty("--angle", angleDeg + "deg");
+  });
+}
+
+function tick(now){
+  if (lastTime === null) lastTime = now;
+  const dt = now - lastTime;
+  lastTime = now;
+
+  // Only advance the rotation while nothing is hovered/focused.
+  // lastTime still updates while paused, so resuming never causes a jump.
+  if (hoverCount === 0 && !prefersReducedMotion) {
+    rotationOffset = (rotationOffset + DEG_PER_SECOND * (dt / 1000)) % 360;
+  }
+  render();
+  requestAnimationFrame(tick);
+}
+
+function init(){
+  measure();
+  buildCards();
+  render();
+  requestAnimationFrame(tick);
+}
+init();
+
 window.addEventListener("resize", () => {
   clearTimeout(window._orbitResizeT);
-  window._orbitResizeT = setTimeout(layoutOrbit, 150);
+  window._orbitResizeT = setTimeout(measure, 150); // re-measure only — rotationOffset (and cards) stay untouched
 });
+
 
 /* =========================================================
    2) PROJECT GRID
