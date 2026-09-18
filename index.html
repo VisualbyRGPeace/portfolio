@@ -459,7 +459,7 @@
 
 <script>
 /* =========================================================
-   1) CIRCULAR GALLERY (hero) — a rotating ring of 12 cards
+   1) CIRCULAR GALLERY (hero) — a rotating ring of 24 cards
    Điền ảnh của bạn vào mảng bên dưới.
    - src: đường dẫn ảnh (ví dụ "images/photo1.jpg" trong repo của bạn)
    - glow: màu phát sáng khi hover (mã hex)
@@ -476,13 +476,26 @@ const orbitImages = [
   { src: "https://images.unsplash.com/photo-1503104834685-7205e8607eb9?w=400", glow: "#ff5b66" },
   { src: "https://images.unsplash.com/photo-1541823709867-1b206113eafd?w=400", glow: "#ffb238" },
   { src: "https://images.unsplash.com/photo-1531256379416-9f000e90aacc?w=400", glow: "#ff6fc9" },
-  { src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400", glow: "#9797a3" }
+  { src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400", glow: "#9797a3" },
+  { src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&sat=-30", glow: "#8a6bff" },
+  { src: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=400", glow: "#35d0ff" },
+  { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", glow: "#ff6fc9" },
+  { src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400", glow: "#ffb238" },
+  { src: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400", glow: "#39e3a6" },
+  { src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&sat=-20", glow: "#ff5b66" },
+  { src: "https://images.unsplash.com/photo-1512310604669-443f26c35f52?w=400", glow: "#6f8bff" },
+  { src: "https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?w=400", glow: "#8a6bff" },
+  { src: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400", glow: "#9797a3" },
+  { src: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=400", glow: "#35d0ff" },
+  { src: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=400", glow: "#ffb238" },
+  { src: "https://images.unsplash.com/photo-1531891437562-4301cf35b7e4?w=400", glow: "#ff6fc9" }
 ];
+
 
 const orbit = document.getElementById("orbit");
 const n = orbitImages.length;
 
-/* Geometry knobs. The 12 cards sit EVENLY around a full circle
+/* Geometry knobs. The cards sit EVENLY around a full circle
    (360 / 12 = 30deg apart), whose center is below the composition —
    only the upper part of that circle is ever inside the visible
    .hero box (which clips overflow), so it reads as an arc while
@@ -511,7 +524,7 @@ function measure(){
 function buildCards(){
   orbit.innerHTML = "";
   cardEls.length = 0;
-  const step = 360 / n; // equal angular spacing, all 12 cards, full circle
+  const step = 360 / n; // equal angular spacing, all cards, full circle
   orbitImages.forEach((item, i) => {
     const card = document.createElement("div");
     card.className = "orbit-card";
