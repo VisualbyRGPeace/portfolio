@@ -1,10 +1,442 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<title>Portfolio của tôi</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Glow In The Dark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07070b;
+    --bg-soft:#0d0d13;
+    --text:#f2f2f6;
+    --muted:#9797a3;
+    --hairline:rgba(255,255,255,0.08);
+    --c-violet:#8a6bff;
+    --c-cyan:#35d0ff;
+    --c-coral:#ff5b66;
+    --c-amber:#ffb238;
+    --c-mint:#39e3a6;
+    --c-rose:#ff6fc9;
+    --c-steel:#6f8bff;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.brand{
+    font-family:'Space Grotesk', sans-serif;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed;
+    top:0; left:0; right:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:28px 6vw;
+    z-index:50;
+    background:linear-gradient(to bottom, rgba(7,7,11,0.85), transparent);
+  }
+  nav{display:flex; gap:34px;}
+  nav a{
+    font-size:14px;
+    color:var(--muted);
+    letter-spacing:.02em;
+    transition:color .25s ease;
+    position:relative;
+  }
+  nav a:hover, nav a:focus-visible{color:var(--text);}
+  nav a::after{
+    content:'';
+    position:absolute; left:0; bottom:-6px;
+    width:0%; height:1px;
+    background:var(--text);
+    transition:width .25s ease;
+  }
+  nav a:hover::after{width:100%;}
+  .brand-mark{
+    font-size:13px;
+    color:var(--muted);
+    letter-spacing:.08em;
+  }
+
+  /* ---------- HERO / CIRCULAR GALLERY ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:140px 20px 80px;
+  }
+  .orbit{
+    position:relative;
+    width:min(640px, 92vw);
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .orbit-card{
+    position:absolute;
+    top:50%; left:50%;
+    width:clamp(64px, 11vw, 108px);
+    aspect-ratio:3/4;
+    border-radius:20px;
+    overflow:hidden;
+    background:#15151d center/cover no-repeat;
+    transform: translate(-50%,-50%) rotate(var(--tilt,0deg)) translate(var(--dist,0px)) rotate(calc(-1 * var(--tilt,0deg)));
+    box-shadow:0 0 0 rgba(0,0,0,0);
+    transition: transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease, filter .5s ease;
+    cursor:pointer;
+    animation: float 7s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .orbit-card::after{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(160deg, transparent 40%, rgba(0,0,0,.35));
+  }
+  .orbit-card img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .orbit-card:hover, .orbit-card:focus-visible{
+    transform: translate(-50%,-50%) rotate(var(--tilt,0deg)) translate(var(--dist,0px)) rotate(calc(-1 * var(--tilt,0deg))) scale(1.22);
+    box-shadow: 0 0 46px 6px var(--glow);
+    filter:saturate(1.15);
+    z-index:20;
+  }
+
+  @keyframes float{
+    0%, 100%{ margin-top:0px; }
+    50%{ margin-top:-10px; }
+  }
+
+  .hero-content{
+    position:relative;
+    z-index:10;
+    text-align:center;
+    max-width:420px;
+    padding:0 16px;
+  }
+  .hero-content h1{
+    font-size:clamp(26px, 4.4vw, 40px);
+    font-weight:600;
+    margin:0 0 16px;
+    letter-spacing:-0.01em;
+  }
+  .hero-content p{
+    font-size:15px;
+    line-height:1.7;
+    color:var(--muted);
+    margin:0 0 30px;
+  }
+  .btn{
+    display:inline-block;
+    background:#fff;
+    color:#0a0a0d;
+    font-weight:600;
+    font-size:14px;
+    padding:13px 30px;
+    border-radius:999px;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px rgba(255,255,255,.15);
+  }
+
+  /* ---------- ABOUT ---------- */
+  section{
+    padding:110px 6vw;
+    border-top:1px solid var(--hairline);
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:40px;
+    margin-bottom:52px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size:clamp(24px,3.4vw,34px);
+    font-weight:600;
+    margin:0;
+  }
+  .section-head .idx{
+    color:var(--muted);
+    font-size:14px;
+  }
+  .about-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+  }
+  .about-grid p{
+    font-size:16px;
+    line-height:1.8;
+    color:var(--muted);
+    max-width:60ch;
+  }
+  .about-stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:28px;
+  }
+  .stat b{
+    display:block;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:30px;
+    font-weight:600;
+  }
+  .stat span{
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  /* ---------- PROJECTS ---------- */
+  .project-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:22px;
+  }
+  .project-card{
+    position:relative;
+    border-radius:18px;
+    overflow:hidden;
+    aspect-ratio:4/5;
+    background:#15151d center/cover no-repeat;
+  }
+  .project-card:nth-child(2){grid-row: span 2; aspect-ratio:4/9.7;}
+  .project-card .tag{
+    position:absolute;
+    left:16px; bottom:16px;
+    font-size:13px;
+    background:rgba(7,7,11,.6);
+    backdrop-filter:blur(6px);
+    padding:7px 14px;
+    border-radius:999px;
+    border:1px solid var(--hairline);
+  }
+  .project-card::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 50%, rgba(0,0,0,.55));
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .project-card:hover::before{opacity:1;}
+  .project-card img{width:100%;height:100%;object-fit:cover; transition:transform .5s ease;}
+  .project-card:hover img{transform:scale(1.06);}
+
+  /* ---------- CONTACT ---------- */
+  .contact-wrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:40px;
+    flex-wrap:wrap;
+  }
+  .contact-wrap h2{
+    font-size:clamp(30px,6vw,64px);
+    font-weight:600;
+    margin:0;
+    max-width:640px;
+    line-height:1.1;
+  }
+  .contact-links{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .contact-links a{
+    font-size:15px;
+    color:var(--muted);
+    transition:color .2s ease;
+  }
+  .contact-links a:hover{color:var(--text);}
+
+  footer{
+    text-align:center;
+    padding:40px 20px 50px;
+    color:var(--muted);
+    font-size:13px;
+    border-top:1px solid var(--hairline);
+  }
+
+  @media (max-width: 760px){
+    .about-grid{grid-template-columns:1fr;}
+    .project-grid{grid-template-columns:1fr 1fr;}
+    .project-card:nth-child(2){grid-row:span 1; aspect-ratio:4/5;}
+    nav{gap:20px;}
+  }
+  @media (max-width: 480px){
+    .project-grid{grid-template-columns:1fr;}
+    header{padding:22px 5vw;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .orbit-card{animation:none; transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
 </head>
 <body>
-<h1>Xin chào!</h1>
-<p>Tôi là Hầu Vương</p>
+
+<header>
+  <nav>
+    <a href="#about">About Me</a>
+    <a href="#projects">My Project</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <span class="brand-mark">© 2026</span>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" style="border-top:none; padding-top:140px;">
+  <div class="orbit" id="orbit"></div>
+  <div class="hero-content">
+    <h1>Glow In The Dark</h1>
+    <p>Mỗi bức ảnh là một câu chuyện được kể lại bằng ánh sáng. Đây là những khoảnh khắc tôi đã chọn để giữ lại.</p>
+    <a href="#contact" class="btn">Liên hệ với tôi</a>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about">
+  <div class="section-head">
+    <h2>Về tôi</h2>
+    <span class="idx">01 — About</span>
+  </div>
+  <div class="about-grid">
+    <p>
+      Tôi là một nhiếp ảnh gia / nhà thiết kế thị giác, tập trung vào ánh sáng, màu sắc và
+      chuyển động. Tôi thích biến những khung hình tĩnh thành thứ gì đó có nhịp điệu —
+      nơi ánh sáng neon, bóng tối và chuyển động cùng kể một câu chuyện.
+      <br><br>
+      Hãy thay đoạn này bằng câu chuyện thật của bạn: bạn làm gì, phong cách của bạn là gì,
+      và điều gì khiến tác phẩm của bạn khác biệt.
+    </p>
+    <div class="about-stats">
+      <div class="stat"><b>40+</b><span>Dự án đã hoàn thành</span></div>
+      <div class="stat"><b>5</b><span>Năm kinh nghiệm</span></div>
+      <div class="stat"><b>12</b><span>Giải thưởng / triển lãm</span></div>
+      <div class="stat"><b>20</b><span>Khách hàng hợp tác</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects">
+  <div class="section-head">
+    <h2>Dự án của tôi</h2>
+    <span class="idx">02 — Projects</span>
+  </div>
+  <div class="project-grid" id="projectGrid"></div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <div class="contact-wrap">
+    <h2>Cùng tạo ra<br>điều gì đó nổi bật.</h2>
+    <div class="contact-links">
+      <a href="mailto:you@example.com">you@example.com</a>
+      <a href="https://instagram.com/yourhandle" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://behance.net/yourhandle" target="_blank" rel="noopener">Behance</a>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 — Yourname. Portfolio built with glow.</footer>
+
+<script>
+/* =========================================================
+   1) CIRCULAR GALLERY (hero)
+   Điền ảnh của bạn vào mảng bên dưới.
+   - src: đường dẫn ảnh (ví dụ "images/photo1.jpg" trong repo của bạn)
+   - glow: màu phát sáng khi hover (mã hex)
+   ========================================================= */
+const orbitImages = [
+  { src: "https://images.unsplash.com/photo-1520975916090-3105956dac38?w=400", glow: "#ff6fc9" },
+  { src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400", glow: "#35d0ff" },
+  { src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400", glow: "#9797a3" },
+  { src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400", glow: "#8a6bff" },
+  { src: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400", glow: "#ff5b66" },
+  { src: "https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=400", glow: "#ffb238" },
+  { src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400", glow: "#6f8bff" },
+  { src: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400", glow: "#39e3a6" },
+  { src: "https://images.unsplash.com/photo-1503104834685-7205e8607eb9?w=400", glow: "#ff5b66" },
+  { src: "https://images.unsplash.com/photo-1541823709867-1b206113eafd?w=400", glow: "#ffb238" },
+  { src: "https://images.unsplash.com/photo-1531256379416-9f000e90aacc?w=400", glow: "#ff6fc9" },
+  { src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400", glow: "#9797a3" }
+];
+
+const orbit = document.getElementById("orbit");
+const n = orbitImages.length;
+
+function layoutOrbit(){
+  const size = orbit.clientWidth;
+  const radius = size * 0.46;
+  orbit.innerHTML = "";
+  orbitImages.forEach((item, i) => {
+    const angle = (360 / n) * i - 90; // start at top, go clockwise
+    const card = document.createElement("div");
+    card.className = "orbit-card";
+    card.style.setProperty("--tilt", angle + "deg");
+    card.style.setProperty("--dist", radius + "px");
+    card.style.setProperty("--glow", item.glow);
+    card.style.setProperty("--delay", (i * 0.35) + "s");
+    card.style.animationDuration = (6 + (i % 3)) + "s";
+    card.tabIndex = 0;
+
+    const img = document.createElement("img");
+    img.src = item.src;
+    img.alt = "Portfolio image " + (i + 1);
+    img.loading = "lazy";
+    card.appendChild(img);
+    orbit.appendChild(card);
+  });
+}
+layoutOrbit();
+window.addEventListener("resize", () => {
+  clearTimeout(window._orbitResizeT);
+  window._orbitResizeT = setTimeout(layoutOrbit, 150);
+});
+
+/* =========================================================
+   2) PROJECT GRID
+   Thêm / sửa các dự án của bạn ở đây.
+   ========================================================= */
+const projects = [
+  { src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600", tag: "Editorial" },
+  { src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600", tag: "Portrait" },
+  { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600", tag: "Neon Series" },
+  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600", tag: "Studio" },
+  { src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600", tag: "Concept" }
+];
+
+const grid = document.getElementById("projectGrid");
+projects.forEach(p => {
+  const card = document.createElement("div");
+  card.className = "project-card";
+  card.innerHTML = `<img src="${p.src}" alt="${p.tag}" loading="lazy"><span class="tag">${p.tag}</span>`;
+  grid.appendChild(card);
+});
+</script>
+
 </body>
 </html>
