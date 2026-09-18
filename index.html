@@ -80,6 +80,18 @@
     padding:140px 20px 80px;
     overflow:hidden; /* cards that rotate past the visible arc are hidden, not clipped abruptly mid-card */
   }
+  /* Bottom fade: dissolves the lower cards into the background color
+     instead of ending on a hard clipped edge, and visually connects
+     the hero into the section below it. */
+  .hero::after{
+    content:'';
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:38%;
+    background:linear-gradient(to bottom, transparent, var(--bg) 80%);
+    pointer-events:none;
+    z-index:15;
+  }
   /* .orbit is the "stage": a full-bleed layer whose coordinate system
      is used to compute the circle in JS. The circle's center sits
      BELOW this box (see the script); cards travel all the way around
@@ -348,7 +360,7 @@
 </section>
 
 <!-- ============ ABOUT ============ -->
-<section id="about">
+<section id="about" style="border-top:none;">
   <div class="section-head">
     <h2>Về tôi</h2>
     <span class="idx">01 — About</span>
