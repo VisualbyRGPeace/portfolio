@@ -268,26 +268,27 @@
   /* ---------- PROJECTS ---------- */
   .project-grid{
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:22px;
+    grid-template-columns:repeat(8, 1fr);
+    gap:10px;
   }
   .project-card{
     position:relative;
-    border-radius:18px;
+    border-radius:12px;
     overflow:hidden;
-    aspect-ratio:4/5;
+    aspect-ratio:1/1;
     background:#15151d center/cover no-repeat;
+    cursor:pointer;
   }
-  .project-card:nth-child(2){grid-row: span 2; aspect-ratio:4/9.7;}
   .project-card .tag{
     position:absolute;
-    left:16px; bottom:16px;
-    font-size:13px;
-    background:rgba(7,7,11,.6);
+    left:8px; bottom:8px;
+    font-size:10px;
+    background:rgba(7,7,11,.7);
     backdrop-filter:blur(6px);
-    padding:7px 14px;
+    padding:4px 9px;
     border-radius:999px;
     border:1px solid var(--hairline);
+    white-space:nowrap;
   }
   .project-card::before{
     content:'';
@@ -295,10 +296,89 @@
     background:linear-gradient(180deg, transparent 50%, rgba(0,0,0,.55));
     opacity:0;
     transition:opacity .3s ease;
+    z-index:1;
   }
   .project-card:hover::before{opacity:1;}
-  .project-card img{width:100%;height:100%;object-fit:cover; transition:transform .5s ease;}
-  .project-card:hover img{transform:scale(1.06);}
+  .project-card img{
+    width:100%; height:100%; object-fit:cover;
+    transition:transform .5s ease, filter .6s ease, opacity .6s ease;
+  }
+  .project-card:hover img{transform:scale(1.08);}
+
+  /* "Xem thêm" — ô cuối cùng, ảnh làm mờ + icon 3 chấm, bấm vào để mở thêm ảnh */
+  .project-card.more-tile img{
+    filter:blur(9px) brightness(.55);
+    transform:scale(1.15);
+  }
+  .project-card.more-tile:hover img{
+    filter:blur(9px) brightness(.65);
+    transform:scale(1.22);
+  }
+  .project-card.more-tile .more-icon{
+    position:absolute; inset:0;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    color:var(--text);
+    background:rgba(0,0,0,0.15);
+  }
+  .more-icon .dots{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:3px;
+    line-height:1;
+  }
+  .more-icon .more-count{
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  /* "Thu gọn" — nút nhỏ gọn NẰM DƯỚI lưới, không chiếm chỗ của một ô ảnh */
+  .project-grid-actions{
+    display:flex;
+    justify-content:center;
+    margin-top:24px;
+  }
+  .collapse-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:transparent;
+    border:1px solid var(--hairline);
+    color:var(--muted);
+    font-size:13px;
+    font-family:inherit;
+    padding:9px 20px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .25s ease, border-color .25s ease, color .25s ease;
+  }
+  .collapse-btn:hover,
+  .collapse-btn:focus-visible{
+    background:rgba(255,255,255,0.06);
+    border-color:rgba(255,255,255,0.25);
+    color:var(--text);
+  }
+  .collapse-btn .chevron{
+    font-size:13px;
+    line-height:1;
+    transform:scaleY(0.8);
+  }
+
+  /* Ảnh mới xuất hiện khi bấm "xem thêm": bắt đầu mờ + mờ dần hiện rõ */
+  .project-card.reveal-pending img{
+    filter:blur(16px);
+    opacity:0;
+    transform:scale(1.08);
+  }
+  .project-card.reveal-pending.revealed img{
+    filter:blur(0);
+    opacity:1;
+    transform:scale(1);
+  }
 
   /* ---------- CONTACT ---------- */
   .contact-wrap{
@@ -335,11 +415,14 @@
     border-top:1px solid var(--hairline);
   }
 
+  @media (max-width: 1100px){
+    .project-grid{grid-template-columns:repeat(6, 1fr);}
+  }
+
   @media (max-width: 760px){
     .about-grid{grid-template-columns:1fr; gap:36px;}
     .about-stats{gap:20px;}
-    .project-grid{grid-template-columns:1fr 1fr;}
-    .project-card:nth-child(2){grid-row:span 1; aspect-ratio:4/5;}
+    .project-grid{grid-template-columns:repeat(4, 1fr); gap:8px;}
     header{padding:20px 5vw;}
     nav{gap:20px;}
     section{padding:72px 6vw;}
@@ -393,7 +476,7 @@
   }
 
   @media (max-width: 480px){
-    .project-grid{grid-template-columns:1fr;}
+    .project-grid{grid-template-columns:repeat(3, 1fr); gap:6px;}
     header{padding:18px 4vw;}
     nav{gap:14px;}
     nav a{font-size:12.5px;}
@@ -413,6 +496,7 @@
     nav{gap:10px;}
     nav a{font-size:11.5px;}
     .brand-mark{display:none;} /* keeps the 3 nav links from wrapping/overlapping on very small phones */
+    .project-grid{grid-template-columns:repeat(2, 1fr);}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -473,6 +557,7 @@
     <span class="idx">02 — Projects</span>
   </div>
   <div class="project-grid" id="projectGrid"></div>
+  <div class="project-grid-actions" id="projectActions"></div>
 </section>
 
 <!-- ============ CONTACT ============ -->
@@ -707,24 +792,107 @@ document.addEventListener("keydown", (e) => {
 
 
 /* =========================================================
-   2) PROJECT GRID
-   Thêm / sửa các dự án của bạn ở đây.
+   2) PROJECT GRID — lưới ảnh vuông, 8 ảnh/dòng, 3 dòng đầu tiên.
+   Ảnh cuối cùng của dòng 3 bị làm mờ + icon "•••": bấm vào để
+   mở thêm các ảnh còn lại (chúng xuất hiện mờ rồi rõ dần).
+   Thêm / sửa ảnh dự án của bạn ở mảng PROJECT_IDS bên dưới.
    ========================================================= */
-const projects = [
-  { src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600", tag: "Editorial" },
-  { src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600", tag: "Portrait" },
-  { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600", tag: "Neon Series" },
-  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600", tag: "Studio" },
-  { src: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600", tag: "Concept" }
+const PROJECT_TAGS = ["Editorial", "Portrait", "Neon Series", "Studio", "Concept", "Travel", "Street", "Mono"];
+// Thay các id này bằng ảnh thật của bạn (src: "images/du-an-1.jpg", ...)
+const PROJECT_IDS = [
+  1015, 1016, 1018, 1019, 1020, 1021, 1022, 1024,
+  1025, 1027, 1028, 1029, 1031, 1035, 1036, 1037,
+  1039, 1040, 1041, 1042, 1043, 1044, 1045, 1047,
+  1048, 1049, 1050, 1051, 1052, 1053, 1054, 1055
 ];
+const projects = PROJECT_IDS.map((id, i) => ({
+  src: `https://picsum.photos/id/${id}/600/600`,
+  tag: PROJECT_TAGS[i % PROJECT_TAGS.length]
+}));
 
 const grid = document.getElementById("projectGrid");
-projects.forEach(p => {
-  const card = document.createElement("div");
-  card.className = "project-card";
-  card.innerHTML = `<img src="${p.src}" alt="${p.tag}" loading="lazy"><span class="tag">${p.tag}</span>`;
-  grid.appendChild(card);
-});
+const actions = document.getElementById("projectActions");
+const INITIAL_VISIBLE = 24; // 8 ảnh / dòng × 3 dòng
+let projectsExpanded = false;
+
+function buildProjectGrid(){
+  grid.innerHTML = "";
+  actions.innerHTML = "";
+  const hasMore = projects.length > INITIAL_VISIBLE;
+  const showCount = projectsExpanded ? projects.length : INITIAL_VISIBLE;
+
+  projects.slice(0, showCount).forEach((p, i) => {
+    const isMoreTile = !projectsExpanded && hasMore && i === INITIAL_VISIBLE - 1;
+
+    const card = document.createElement("div");
+    card.className = "project-card" + (isMoreTile ? " more-tile" : "");
+
+    const img = document.createElement("img");
+    img.src = p.src;
+    img.alt = p.tag || ("Project " + (i + 1));
+    img.loading = "lazy";
+    card.appendChild(img);
+
+    if (isMoreTile){
+      // Ô cuối cùng: ảnh mờ đi, phủ icon "•••" — bấm để mở thêm ảnh
+      const remaining = projects.length - INITIAL_VISIBLE + 1;
+      const overlay = document.createElement("div");
+      overlay.className = "more-icon";
+      overlay.innerHTML = `<span class="dots">•••</span><span class="more-count">+${remaining} ảnh</span>`;
+      card.appendChild(overlay);
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("aria-label", `Xem thêm ${remaining} ảnh`);
+      const expand = () => { projectsExpanded = true; buildProjectGrid(); };
+      card.addEventListener("click", expand);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); expand(); }
+      });
+    } else {
+      if (p.tag){
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = p.tag;
+        card.appendChild(tag);
+      }
+      card.addEventListener("click", () => openLightbox(p.src, img.alt));
+      // Các ảnh vừa "mở thêm" sẽ khởi đầu ở trạng thái mờ để hiệu ứng
+      // mờ → rõ dần có thể chạy khi thêm class .revealed ngay sau đó.
+      if (projectsExpanded && i >= INITIAL_VISIBLE - 1){
+        card.classList.add("reveal-pending");
+      }
+    }
+
+    grid.appendChild(card);
+  });
+
+  if (projectsExpanded && hasMore){
+    // Nút "Thu gọn" nhỏ gọn nằm dưới lưới — không chiếm chỗ của một ô ảnh
+    const collapseBtn = document.createElement("button");
+    collapseBtn.type = "button";
+    collapseBtn.className = "collapse-btn";
+    collapseBtn.innerHTML = `<span class="chevron">⌃</span> Thu gọn`;
+    collapseBtn.setAttribute("aria-label", "Thu gọn ảnh");
+    collapseBtn.addEventListener("click", () => {
+      projectsExpanded = false;
+      buildProjectGrid();
+      // đưa người dùng về đầu khu vực dự án thay vì để họ ở cuối một lưới đã biến mất
+      document.getElementById("projects").scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+    });
+    actions.appendChild(collapseBtn);
+  }
+
+  if (projectsExpanded){
+    const newCards = grid.querySelectorAll(".project-card.reveal-pending:not(.revealed)");
+    requestAnimationFrame(() => {
+      newCards.forEach((c, idx) => {
+        setTimeout(() => c.classList.add("revealed"), idx * 35);
+      });
+    });
+  }
+}
+
+buildProjectGrid();
 </script>
 
 </body>
