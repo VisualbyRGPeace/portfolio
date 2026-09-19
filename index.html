@@ -268,7 +268,11 @@
     flex-wrap:wrap;
     gap:36px;
   }
-  .logos-row img{
+  .logo-item{
+    position:relative;
+    display:inline-flex;
+  }
+  .logo-item img{
     height:28px;
     width:auto;
     max-width:120px;
@@ -277,8 +281,52 @@
     opacity:.55;
     transition:opacity .25s ease, filter .25s ease;
   }
-  .logos-row img:hover{
+  .logo-item:hover img,
+  .logo-item:focus-visible img{
     filter:none;
+    opacity:1;
+  }
+  /* Tooltip tên công ty — hiện phía trên logo khi trỏ chuột vào */
+  .logo-item::after{
+    content:attr(data-name);
+    position:absolute;
+    left:50%; bottom:calc(100% + 10px);
+    transform:translate(-50%, 4px);
+    white-space:nowrap;
+    font-size:12px;
+    font-weight:500;
+    color:var(--text);
+    background:#15151d;
+    border:1px solid var(--hairline);
+    padding:6px 12px;
+    border-radius:8px;
+    box-shadow:0 10px 24px rgba(0,0,0,.4);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:5;
+  }
+  /* Mũi tên nhỏ trỏ xuống logo */
+  .logo-item::before{
+    content:'';
+    position:absolute;
+    left:50%; bottom:calc(100% + 4px);
+    transform:translateX(-50%);
+    width:8px; height:8px;
+    background:#15151d;
+    border-right:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    transform:translateX(-50%) rotate(45deg);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:5;
+  }
+  .logo-item:hover::after, .logo-item:focus-visible::after{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+  .logo-item:hover::before, .logo-item:focus-visible::before{
     opacity:1;
   }
 
@@ -522,7 +570,7 @@
     .stat b{font-size:26px;}
     .about-logos{margin-top:28px;}
     .logos-row{gap:24px;}
-    .logos-row img{height:22px;}
+    .logo-item img{height:22px;}
     .contact-wrap{gap:26px;}
     .lightbox{padding:16px;}
     .lightbox-close{top:14px; right:14px; width:38px; height:38px; font-size:16px;}
@@ -581,9 +629,15 @@
       <div class="about-logos">
         <span class="logos-label">Đã hợp tác cùng</span>
         <div class="logos-row">
-          <img src="images/logo1.png" alt="Logo công ty 1" loading="lazy">
-          <img src="images/logo2.png" alt="Logo công ty 2" loading="lazy">
-          <img src="images/logo3.png" alt="Logo công ty 3" loading="lazy">
+          <span class="logo-item" data-name="Tên công ty 1" tabindex="0">
+            <img src="images/logo1.png" alt="Logo công ty 1" loading="lazy">
+          </span>
+          <span class="logo-item" data-name="Tên công ty 2" tabindex="0">
+            <img src="images/logo2.png" alt="Logo công ty 2" loading="lazy">
+          </span>
+          <span class="logo-item" data-name="Tên công ty 3" tabindex="0">
+            <img src="images/logo3.png" alt="Logo công ty 3" loading="lazy">
+          </span>
         </div>
       </div>
     </div>
