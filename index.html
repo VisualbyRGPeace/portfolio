@@ -24,13 +24,15 @@
   }
 
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth; overflow-x:hidden; width:100%;}
   body{
     margin:0;
+    width:100%;
     background:var(--bg);
     color:var(--text);
     font-family:'Inter', sans-serif;
     -webkit-font-smoothing:antialiased;
+    -webkit-text-size-adjust:100%;
     overflow-x:hidden;
   }
   h1,h2,h3,.brand{
@@ -46,17 +48,27 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:12px;
     padding:28px 6vw;
     z-index:50;
     background:linear-gradient(to bottom, rgba(7,7,11,0.85), transparent);
   }
-  nav{display:flex; gap:34px;}
+  nav{
+    display:flex;
+    gap:34px;
+    min-width:0;
+    overflow-x:auto;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+  }
+  nav::-webkit-scrollbar{display:none;}
   nav a{
     font-size:14px;
     color:var(--muted);
     letter-spacing:.02em;
     transition:color .25s ease;
     position:relative;
+    white-space:nowrap;
   }
   nav a:hover, nav a:focus-visible{color:var(--text);}
   nav a::after{
@@ -71,12 +83,14 @@
     font-size:13px;
     color:var(--muted);
     letter-spacing:.08em;
+    flex-shrink:0;
   }
 
   /* ---------- HERO / CIRCULAR GALLERY ---------- */
   .hero{
     position:relative;
     min-height:100vh;
+    min-height:100svh; /* fixes mobile browsers where 100vh includes the address bar and cuts/jumps the layout */
     padding:140px 20px 80px;
     overflow:hidden; /* cards that rotate past the visible arc are hidden, not clipped abruptly mid-card */
   }
@@ -322,10 +336,16 @@
   }
 
   @media (max-width: 760px){
-    .about-grid{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr; gap:36px;}
+    .about-stats{gap:20px;}
     .project-grid{grid-template-columns:1fr 1fr;}
     .project-card:nth-child(2){grid-row:span 1; aspect-ratio:4/5;}
+    header{padding:20px 5vw;}
     nav{gap:20px;}
+    section{padding:72px 6vw;}
+    .section-head{margin-bottom:36px;}
+    .hero{padding:120px 16px 70px;}
+    .orbit-card{width:clamp(48px, 11vw, 88px);}
   }
   /* ---------- LIGHTBOX ---------- */
   .lightbox{
@@ -374,7 +394,25 @@
 
   @media (max-width: 480px){
     .project-grid{grid-template-columns:1fr;}
-    header{padding:22px 5vw;}
+    header{padding:18px 4vw;}
+    nav{gap:14px;}
+    nav a{font-size:12.5px;}
+    .brand-mark{font-size:11px;}
+    .hero{padding:110px 14px 60px;}
+    .hero-content h1{margin-bottom:12px;}
+    .hero-content p{margin-bottom:22px;}
+    section{padding:56px 5vw;}
+    .about-stats{grid-template-columns:1fr 1fr; gap:16px;}
+    .stat b{font-size:26px;}
+    .contact-wrap{gap:26px;}
+    .lightbox{padding:16px;}
+    .lightbox-close{top:14px; right:14px; width:38px; height:38px; font-size:16px;}
+  }
+
+  @media (max-width: 360px){
+    nav{gap:10px;}
+    nav a{font-size:11.5px;}
+    .brand-mark{display:none;} /* keeps the 3 nav links from wrapping/overlapping on very small phones */
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -500,8 +538,6 @@ const n = orbitImages.length;
    only the upper part of that circle is ever inside the visible
    .hero box (which clips overflow), so it reads as an arc while
    really being a full ring underneath. */
-const CENTER_Y_RATIO = 0.86; // circle center's vertical position, as a fraction of stage height (below the middle)
-const RADIUS_RATIO   = 0.66; // circle radius, as a fraction of the stage's shorter side
 const DEG_PER_SECOND = 3.2;  // rotation speed — slow and continuous
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -513,9 +549,22 @@ let hoverCount = 0;       // >0 while the pointer/focus is on any card
 let lightboxOpen = false; // true while the full-screen image view is open
 let lastTime = null;
 
+/* On narrow (portrait phone) viewports, orbit.clientWidth is much smaller
+   than on desktop while clientHeight stays tall, so a fixed RADIUS_RATIO
+   based on min(w,h) makes the ring shrink a lot more than the design
+   intends and can crowd/overlap the centered text. These values scale
+   the ring back up (and nudge its center) on narrower screens so the
+   arc keeps a similar visual weight at every breakpoint. */
+function getGeometryRatios(w){
+  if (w <= 480)  return { radius: 0.80, centerY: 0.90 };
+  if (w <= 760)  return { radius: 0.74, centerY: 0.88 };
+  return { radius: 0.66, centerY: 0.86 };
+}
+
 function measure(){
   const w = orbit.clientWidth;
   const h = orbit.clientHeight;
+  const { radius: RADIUS_RATIO, centerY: CENTER_Y_RATIO } = getGeometryRatios(w);
   geo.cx = w / 2;
   geo.cy = h * CENTER_Y_RATIO;
   geo.radius = Math.min(w, h) * RADIUS_RATIO;
