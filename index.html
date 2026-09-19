@@ -249,6 +249,39 @@
     color:var(--muted);
     max-width:60ch;
   }
+
+  /* ---------- LOGO DÃY ĐỐI TÁC ---------- */
+  .about-logos{
+    margin-top:36px;
+  }
+  .about-logos .logos-label{
+    display:block;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:16px;
+  }
+  .logos-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:36px;
+  }
+  .logos-row img{
+    height:28px;
+    width:auto;
+    max-width:120px;
+    object-fit:contain;
+    filter:grayscale(1) brightness(1.8);
+    opacity:.55;
+    transition:opacity .25s ease, filter .25s ease;
+  }
+  .logos-row img:hover{
+    filter:none;
+    opacity:1;
+  }
+
   .about-stats{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -487,6 +520,9 @@
     section{padding:56px 5vw;}
     .about-stats{grid-template-columns:1fr 1fr; gap:16px;}
     .stat b{font-size:26px;}
+    .about-logos{margin-top:28px;}
+    .logos-row{gap:24px;}
+    .logos-row img{height:22px;}
     .contact-wrap{gap:26px;}
     .lightbox{padding:16px;}
     .lightbox-close{top:14px; right:14px; width:38px; height:38px; font-size:16px;}
@@ -533,14 +569,24 @@
     <span class="idx">01 — About</span>
   </div>
   <div class="about-grid">
-    <p>
-      Tôi là một nhiếp ảnh gia / nhà thiết kế thị giác, tập trung vào ánh sáng, màu sắc và
-      chuyển động. Tôi thích biến những khung hình tĩnh thành thứ gì đó có nhịp điệu —
-      nơi ánh sáng neon, bóng tối và chuyển động cùng kể một câu chuyện.
-      <br><br>
-      Hãy thay đoạn này bằng câu chuyện thật của bạn: bạn làm gì, phong cách của bạn là gì,
-      và điều gì khiến tác phẩm của bạn khác biệt.
-    </p>
+    <div>
+      <p>
+        Tôi là một nhiếp ảnh gia / nhà thiết kế thị giác, tập trung vào ánh sáng, màu sắc và
+        chuyển động. Tôi thích biến những khung hình tĩnh thành thứ gì đó có nhịp điệu —
+        nơi ánh sáng neon, bóng tối và chuyển động cùng kể một câu chuyện.
+        <br><br>
+        Hãy thay đoạn này bằng câu chuyện thật của bạn: bạn làm gì, phong cách của bạn là gì,
+        và điều gì khiến tác phẩm của bạn khác biệt.
+      </p>
+      <div class="about-logos">
+        <span class="logos-label">Đã hợp tác cùng</span>
+        <div class="logos-row">
+          <img src="images/logo1.png" alt="Logo công ty 1" loading="lazy">
+          <img src="images/logo2.png" alt="Logo công ty 2" loading="lazy">
+          <img src="images/logo3.png" alt="Logo công ty 3" loading="lazy">
+        </div>
+      </div>
+    </div>
     <div class="about-stats">
       <div class="stat"><b>40+</b><span>Dự án đã hoàn thành</span></div>
       <div class="stat"><b>5</b><span>Năm kinh nghiệm</span></div>
