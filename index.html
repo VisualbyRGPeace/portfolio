@@ -632,10 +632,10 @@
           <span class="logo-item" data-name="NAWON F&B CO., LTD." tabindex="0">
             <img src="images/logo1.png" alt="Logo công ty 1" loading="lazy">
           </span>
-          <span class="logo-item" data-name="JB'Fresh F&B CO., LTD." tabindex="0">
+          <span class="logo-item" data-name="JB FRESH F&B CO., LTD." tabindex="0">
             <img src="images/logo2.png" alt="Logo công ty 2" loading="lazy">
           </span>
-          <span class="logo-item" data-name="nico trading co.,ltd" tabindex="0">
+          <span class="logo-item" data-name="NICO TRADING CO., LTD." tabindex="0">
             <img src="images/logo3.png" alt="Logo công ty 3" loading="lazy">
           </span>
         </div>
@@ -732,6 +732,7 @@ const cardEls = []; // { el, baseAngle }
 let rotationOffset = 0;   // degrees; keeps accumulating, never resets — this is what makes resume seamless
 let hoverCount = 0;       // >0 while the pointer/focus is on any card
 let lightboxOpen = false; // true while the full-screen image view is open
+let restoringFocus = false; // true only while we programmatically return focus after closing the lightbox
 let lastTime = null;
 
 /* On narrow (portrait phone) viewports, orbit.clientWidth is much smaller
@@ -783,7 +784,10 @@ function buildCards(){
     orbit.appendChild(card);
 
     // Pause the whole ring while this card is hovered/focused, resume when none are.
-    const enter = () => { hoverCount++; };
+    // (focus() called programmatically to restore keyboard focus after closing the
+    // lightbox is ignored here via `restoringFocus`, otherwise it would leave the
+    // ring stuck paused until the user happened to click/hover something else.)
+    const enter = () => { if (!restoringFocus) hoverCount++; };
     const leave = () => { hoverCount = Math.max(0, hoverCount - 1); };
     card.addEventListener("mouseenter", enter);
     card.addEventListener("mouseleave", leave);
@@ -878,7 +882,11 @@ function closeLightbox(){
   lightbox.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
   lightboxOpen = false;
-  if (lastFocusedCard) lastFocusedCard.focus();
+  if (lastFocusedCard) {
+    restoringFocus = true;
+    lastFocusedCard.focus();
+    restoringFocus = false;
+  }
 }
 
 lightboxClose.addEventListener("click", closeLightbox);
