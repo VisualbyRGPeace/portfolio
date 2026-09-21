@@ -983,45 +983,54 @@ const CATEGORY_LABEL = Object.fromEntries(CATEGORIES.map(c => [c.key, c.label]))
 // open in a new tab instead of the full-screen lightbox. Leave it as "" to
 // keep the default lightbox behavior for that photo.
 const PROJECT_ITEMS = [
-  { id: 1015, category: "social",    link: "https://i.postimg.cc/3wyyHbnC/766890097-1076784598201770-7577469320810769565-n.jpg" },
-  { id: 1016, category: "social",    link: "" },
-  { id: 1018, category: "social",    link: "" },
-  { id: 1019, category: "social",    link: "" },
-  { id: 1020, category: "social",    link: "" },
-  { id: 1021, category: "social",    link: "" },
-  { id: 1022, category: "social",    link: "" },
-  { id: 1024, category: "logo",      link: "" },
-  { id: 1025, category: "logo",      link: "" },
-  { id: 1027, category: "logo",      link: "" },
-  { id: 1028, category: "logo",      link: "" },
-  { id: 1029, category: "logo",      link: "" },
-  { id: 1031, category: "logo",      link: "" },
-  { id: 1035, category: "typo",      link: "" },
-  { id: 1036, category: "typo",      link: "" },
-  { id: 1037, category: "typo",      link: "" },
-  { id: 1039, category: "typo",      link: "" },
-  { id: 1040, category: "typo",      link: "" },
-  { id: 1041, category: "typo",      link: "" },
-  { id: 1042, category: "packaging", link: "" },
-  { id: 1043, category: "packaging", link: "" },
-  { id: 1044, category: "packaging", link: "" },
-  { id: 1045, category: "packaging", link: "" },
-  { id: 1047, category: "packaging", link: "" },
-  { id: 1048, category: "packaging", link: "" },
-  { id: 1049, category: "art",       link: "" },
-  { id: 1050, category: "art",       link: "" },
-  { id: 1051, category: "art",       link: "" },
-  { id: 1052, category: "art",       link: "" },
-  { id: 1053, category: "art",       link: "" },
-  { id: 1054, category: "art",       link: "" },
-  { id: 1055, category: "art",       link: "" }
+  // Dán LINK ẢNH TRỰC TIẾP vào `src`.
+  // category: social | logo | typo | packaging | art
+
+  { category: "social",    src: "https://i.postimg.cc/3wyyHbnC/766890097-1076784598201770-7577469320810769565-n.jpg" },
+  { category: "social",    src: "" },
+  { category: "social",    src: "" },
+  { category: "social",    src: "" },
+  { category: "social",    src: "" },
+  { category: "social",    src: "" },
+  { category: "social",    src: "" },
+
+  { category: "logo",      src: "" },
+  { category: "logo",      src: "" },
+  { category: "logo",      src: "" },
+  { category: "logo",      src: "" },
+  { category: "logo",      src: "" },
+  { category: "logo",      src: "" },
+
+  { category: "typo",      src: "" },
+  { category: "typo",      src: "" },
+  { category: "typo",      src: "" },
+  { category: "typo",      src: "" },
+  { category: "typo",      src: "" },
+  { category: "typo",      src: "" },
+
+  { category: "packaging", src: "" },
+  { category: "packaging", src: "" },
+  { category: "packaging", src: "" },
+  { category: "packaging", src: "" },
+  { category: "packaging", src: "" },
+  { category: "packaging", src: "" },
+
+  { category: "art",       src: "" },
+  { category: "art",       src: "" },
+  { category: "art",       src: "" },
+  { category: "art",       src: "" },
+  { category: "art",       src: "" },
+  { category: "art",       src: "" },
+  { category: "art",       src: "" }
 ];
-const projects = PROJECT_ITEMS.map(item => ({
-  src: `https://picsum.photos/id/${item.id}/600/600`,
-  category: item.category,
-  tag: CATEGORY_LABEL[item.category],
-  link: item.link || null
-}));
+
+const projects = PROJECT_ITEMS
+  .filter(item => item.src && item.src.trim() !== "")
+  .map(item => ({
+    src: item.src.trim(),
+    category: item.category,
+    tag: CATEGORY_LABEL[item.category] || item.category
+  }));
 
 const grid = document.getElementById("projectGrid");
 const actions = document.getElementById("projectActions");
@@ -1080,18 +1089,11 @@ function buildProjectGrid(){
 
   filtered.slice(0, showCount).forEach((p, i) => {
     const isMoreTile = !projectsExpanded && hasMore && i === INITIAL_VISIBLE - 1;
-    const hasLink = !isMoreTile && !!p.link;
-
-    // A project with a "link" set becomes a real <a> tile that opens that
-    // URL in a new tab; one without a link stays a <div> that opens the
-    // full-screen lightbox instead, same as before.
-    const card = document.createElement(hasLink ? "a" : "div");
+    // Every `src` is the actual image URL.
+    // There is no separate project/link URL anymore.
+    // Clicking a normal tile opens the image in the existing lightbox.
+    const card = document.createElement("div");
     card.className = "project-card" + (isMoreTile ? " more-tile" : "");
-    if (hasLink){
-      card.href = p.link;
-      card.target = "_blank";
-      card.rel = "noopener";
-    }
 
     const img = document.createElement("img");
     img.src = p.src;
@@ -1121,9 +1123,7 @@ function buildProjectGrid(){
         tag.textContent = p.tag;
         card.appendChild(tag);
       }
-      if (!hasLink){
-        card.addEventListener("click", () => openLightbox(p.src, img.alt));
-      }
+      card.addEventListener("click", () => openLightbox(p.src, img.alt));
       // Photos that just got revealed start blurred so the blur → sharp
       // effect can play once the .revealed class is added right after.
       if (projectsExpanded && i >= INITIAL_VISIBLE - 1){
