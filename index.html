@@ -742,8 +742,17 @@ let lastTime = null;
    the ring back up (and nudge its center) on narrower screens so the
    arc keeps a similar visual weight at every breakpoint. */
 function getGeometryRatios(w){
-  if (w <= 480)  return { radius: 0.80, centerY: 0.90 };
-  if (w <= 760)  return { radius: 0.74, centerY: 0.88 };
+  // These were tuned against min(w,h), which on a landscape desktop
+  // equals h (so the ring reads as a broad, shallow arc above the
+  // text). On a PORTRAIT phone min(w,h) equals w instead, which is
+  // much smaller than h — so the same ratios put the circle's
+  // center too low and its top edge too close to (or under) the
+  // centered hero title. The values below are recalibrated so the
+  // topmost card lands at a roughly fixed fraction of the hero's
+  // HEIGHT (~15-16% down) regardless of how narrow the screen is,
+  // keeping a consistent gap above the title on every phone size.
+  if (w <= 480)  return { radius: 0.62, centerY: 0.50 };
+  if (w <= 760)  return { radius: 0.60, centerY: 0.55 };
   return { radius: 0.66, centerY: 0.86 };
 }
 
