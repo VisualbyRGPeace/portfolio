@@ -389,6 +389,14 @@
     display:grid;
     grid-template-columns:repeat(8, 1fr);
     gap:10px;
+    transition:opacity .28s ease, transform .28s ease;
+  }
+  /* Applied briefly while switching category tabs: fades the current
+     grid out just before its content is swapped, then removed right
+     after so it fades/slides back in with the new set of photos. */
+  .project-grid.is-switching{
+    opacity:0;
+    transform:translateY(10px);
   }
   .project-card{
     position:relative;
@@ -1019,8 +1027,31 @@ const grid = document.getElementById("projectGrid");
 const actions = document.getElementById("projectActions");
 const filtersEl = document.getElementById("projectFilters");
 const INITIAL_VISIBLE = 24; // 8 photos / row × 3 rows (only applies when a category has more photos than this)
+const GRID_TRANSITION_MS = 260; // must match the .project-grid transition duration in CSS
 let projectsExpanded = false;
 let activeCategory = "all";
+let gridSwitchTimer = null;
+
+// Fades the current grid out, swaps in the new category's photos, then
+// fades/slides the new grid back in — the "smooth scene change" between tabs.
+function switchCategory(key){
+  activeCategory = key;
+  projectsExpanded = false; // reset to the collapsed state every time the category changes
+  buildFilters();
+
+  if (prefersReducedMotion){
+    buildProjectGrid();
+    return;
+  }
+
+  clearTimeout(gridSwitchTimer);
+  grid.classList.add("is-switching");
+  gridSwitchTimer = setTimeout(() => {
+    buildProjectGrid();
+    void grid.offsetWidth; // force a reflow so the fade-in transition actually plays
+    grid.classList.remove("is-switching");
+  }, GRID_TRANSITION_MS);
+}
 
 function buildFilters(){
   filtersEl.innerHTML = "";
@@ -1032,10 +1063,7 @@ function buildFilters(){
     btn.setAttribute("aria-pressed", cat.key === activeCategory ? "true" : "false");
     btn.addEventListener("click", () => {
       if (activeCategory === cat.key) return;
-      activeCategory = cat.key;
-      projectsExpanded = false; // reset to the collapsed state every time the category changes
-      buildFilters();
-      buildProjectGrid();
+      switchCategory(cat.key);
     });
     filtersEl.appendChild(btn);
   });
