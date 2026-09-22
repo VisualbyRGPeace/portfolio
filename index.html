@@ -462,71 +462,58 @@
 
   /* Featured stat / toggle: "Years of experience" is now a button that
      reveals the Roles grid below it (see .roles-panel) — glowing ring,
-     gradient number, count-up on scroll (see script), chevron flips on open. */
+     gradient number, count-up on scroll (see script), chevron flips on open.
+     Deliberately unboxed — no border/background card, just the glowing
+     gradient number sitting directly on the page. */
   .stat-hero{
     position:relative;
-    display:flex;
-    flex-direction:column;
+    display:inline-flex;
     align-items:center;
-    justify-content:center;
-    gap:6px;
-    width:100%;
-    max-width:220px;
-    margin:0 0 8px;
-    padding:22px 26px;
-    border-radius:20px;
-    border:1px solid color-mix(in srgb, var(--c-violet) 45%, transparent);
-    background:
-      radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--c-violet) 22%, transparent), transparent 65%),
-      rgba(255,255,255,.03);
-    box-shadow:0 0 44px -16px color-mix(in srgb, var(--c-violet) 65%, transparent);
-    overflow:hidden;
+    gap:16px;
+    margin:0 0 44px;
+    padding:4px 0;
+    border:none;
+    background:none;
+    box-shadow:none;
+    border-radius:0;
     cursor:pointer;
     font:inherit;
+    text-align:left;
     -webkit-tap-highlight-color:transparent;
-    transition:border-color .3s ease, box-shadow .3s ease, transform .3s ease;
+    transition:transform .3s ease, filter .3s ease;
   }
   .stat-hero:hover, .stat-hero:focus-visible{
-    border-color:color-mix(in srgb, var(--c-violet) 75%, transparent);
-    box-shadow:0 0 54px -14px color-mix(in srgb, var(--c-violet) 80%, transparent);
+    filter:brightness(1.12);
     outline:none;
   }
   .stat-hero:active{transform:scale(.98);}
-  .stat-hero-ring{
-    position:absolute;
-    inset:-40%;
-    background:conic-gradient(from 0deg, transparent, color-mix(in srgb, var(--c-violet) 35%, transparent), transparent 35%);
-    animation:stat-spin 6s linear infinite;
-    opacity:.55;
-    pointer-events:none;
-  }
-  @keyframes stat-spin{ to{ transform:rotate(360deg); } }
   .stat-hero b{
     position:relative;
     display:flex;
     align-items:flex-start;
     font-family:'Space Grotesk', sans-serif;
-    font-size:40px;
+    font-size:clamp(46px, 8vw, 68px);
     font-weight:600;
     line-height:1;
     background:linear-gradient(160deg, #fff, var(--c-violet));
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
+    filter:drop-shadow(0 0 28px color-mix(in srgb, var(--c-violet) 55%, transparent));
   }
-  .stat-hero-plus{ font-size:20px; margin-top:3px; }
-  .stat-hero > span{
+  .stat-hero-plus{ font-size:.42em; margin-top:.15em; }
+  .stat-hero-label{
     position:relative;
-    color:var(--text);
-    font-size:12px;
+    color:var(--muted);
+    font-size:13px;
     font-weight:500;
-    letter-spacing:.02em;
-    text-align:center;
+    line-height:1.4;
+    letter-spacing:.01em;
   }
   .stat-hero-chevron{
     position:relative;
     width:9px; height:9px;
-    margin-top:2px !important;
+    margin-left:2px;
     border-right:1.6px solid var(--muted);
     border-bottom:1.6px solid var(--muted);
     transform:rotate(45deg);
@@ -534,7 +521,6 @@
   }
   .stat-hero[aria-expanded="true"] .stat-hero-chevron{
     transform:rotate(225deg);
-    margin-top:-2px !important;
   }
 
   /* Roles grid: collapsed by default, unfurls when the "Years of experience"
@@ -558,38 +544,10 @@
     transition-delay:0s;
   }
   @media (max-width:520px){
-    .stat-hero{max-width:none; padding:20px;}
+    .stat-hero{gap:12px; margin-bottom:34px;}
   }
 
   /* ---------- CAREER ---------- */
-  .career-intro{
-    display:grid;
-    grid-template-columns:1.15fr 1fr;
-    gap:60px;
-    align-items:end;
-    margin-bottom:60px;
-  }
-  .career-headline{
-    font-size:clamp(30px, 4.6vw, 56px);
-    font-weight:600;
-    line-height:1.08;
-    letter-spacing:-.01em;
-    margin:0;
-  }
-  .career-headline em{
-    font-style:normal;
-    background:linear-gradient(90deg, var(--c-violet), var(--c-cyan));
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-  }
-  .career-lead p{
-    font-size:16px;
-    line-height:1.8;
-    color:var(--muted);
-    margin:0 0 22px;
-    max-width:56ch;
-  }
   .career-points{
     display:flex;
     flex-wrap:wrap;
@@ -1355,7 +1313,6 @@
   }
 
   @media (max-width: 900px){
-    .career-intro{grid-template-columns:1fr; gap:26px; margin-bottom:40px;}
     .skill-grid{grid-template-columns:1fr 1fr;}
     .skill, .skill:nth-child(n+3){grid-column:auto;}
     .skill:last-child{grid-column:1 / -1;} /* odd card out gets the full row */
@@ -1503,30 +1460,18 @@
     <span class="idx">02 — Career</span>
   </div>
 
-  <div class="career-intro">
-    <!-- EDIT: your headline + promise -->
-    <h3 class="career-headline rv" data-rv>I turn briefs into brands people <em>remember</em>.</h3>
-    <div class="career-lead rv" data-rv>
-      <p>From first idea to print-ready files — design that looks sharp and stays consistent everywhere.</p>
-      <ul class="career-points">
-        <li>Clear process</li>
-        <li>Consistent systems</li>
-        <li>Production-ready files</li>
-      </ul>
-      <a href="#contact" class="btn">Let's work together</a>
-    </div>
-  </div>
+  <!-- "Years of experience" — plain, unboxed feature stat at the top of
+       Career; click it to unfurl the Roles grid below (collapsed by default). -->
+  <button type="button" class="stat-hero roles-toggle rv" data-rv data-count-to="3" aria-expanded="false" aria-controls="roles-panel">
+    <b><span class="stat-hero-num">0</span><span class="stat-hero-plus">+</span></b>
+    <span class="stat-hero-label">Years of<br>experience</span>
+    <span class="stat-hero-chevron" aria-hidden="true"></span>
+  </button>
 
   <!-- Roles I've held — click a title to jump to the matching photos in Projects
        (data-goto-cat = social | logo | typo | packaging | art); "See more" opens the details.
        The whole Roles grid stays collapsed until "Years of experience" is clicked. -->
   <div class="career-sub first rv" data-rv><span class="logos-label">Roles</span></div>
-  <button type="button" class="stat-hero roles-toggle" data-count-to="3" aria-expanded="false" aria-controls="roles-panel">
-    <span class="stat-hero-ring" aria-hidden="true"></span>
-    <b><span class="stat-hero-num">0</span><span class="stat-hero-plus">+</span></b>
-    <span>Years of experience</span>
-    <span class="stat-hero-chevron" aria-hidden="true"></span>
-  </button>
   <div class="roles-panel" id="roles-panel"><div class="roles-panel-inner">
   <div class="skill-grid">
     <article class="skill rv" data-rv style="--accent:var(--c-violet)">
