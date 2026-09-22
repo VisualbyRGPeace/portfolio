@@ -1044,162 +1044,163 @@
   }
 
   /* ---------- FEATURED (real-life project photos) ----------
-     Modeled directly on the reference clip: real photo cutouts fanned out
-     in one overlapping stack. Hovering (or tapping) a photo lifts it clear
-     of its neighbours; a solid-color card beside the stack swaps in that
-     photo's title / description / year, plus Download + View actions. */
+     A scattered "pinned photo" wall: each PNG sits in a tilted polaroid-style
+     frame. Hovering/tapping a photo lifts it, dims its neighbours, and
+     swaps the content of the sticky caption panel on the right. */
   .feat-intro{
     max-width:62ch;
     color:var(--muted);
     font-size:16px;
     line-height:1.8;
-    margin:-28px 0 48px;
+    margin:-28px 0 44px;
   }
   .feat-layout{
     display:grid;
-    grid-template-columns:1fr 320px;
-    gap:40px;
-    align-items:center;
+    grid-template-columns:1fr 340px;
+    gap:12px 48px;
+    align-items:start;
   }
-  .feat-stage{
+  .feat-strip{
+    display:flex;
+    flex-wrap:wrap;
+    align-content:flex-start;
+    gap:34px 22px;
+    padding:16px 4px 40px;
+  }
+  .feat-item{
     position:relative;
-    height:clamp(280px, 32vw, 400px);
-  }
-  .feat-stack{
-    position:absolute;
-    inset:0;
-  }
-  .feat-photo{
-    position:absolute;
-    top:50%;
-    left:var(--x, 0px);
-    width:clamp(150px, 19vw, 230px);
-    aspect-ratio:3/4;
+    width:clamp(132px, 21vw, 188px);
+    background:#f4f2ec;
+    padding:10px 10px 30px;
+    border-radius:5px;
     border:none;
-    padding:0;
-    margin:0;
-    border-radius:8px;
-    overflow:hidden;
-    background:#15151d;
     cursor:pointer;
-    box-shadow:0 20px 40px rgba(0,0,0,.55);
-    transform:translateY(-50%) rotate(var(--tilt, 0deg));
-    transition:transform .5s var(--ease-lux), box-shadow .5s var(--ease-lux);
-    z-index:var(--z, 1);
+    font-family:inherit;
+    box-shadow:0 14px 30px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
+    transform:rotate(var(--tilt,0deg));
+    transition:transform .5s var(--ease-lux), box-shadow .45s var(--ease-lux), opacity .4s ease, filter .4s ease;
+    will-change:transform;
   }
-  .feat-photo img{
+  .feat-item:nth-child(6n+1){ --tilt:-4deg; }
+  .feat-item:nth-child(6n+2){ --tilt:3deg; }
+  .feat-item:nth-child(6n+3){ --tilt:-2deg; }
+  .feat-item:nth-child(6n+4){ --tilt:5deg; }
+  .feat-item:nth-child(6n+5){ --tilt:-5deg; }
+  .feat-item:nth-child(6n+6){ --tilt:2deg; }
+  .feat-item .feat-thumb{
+    position:relative;
+    width:100%;
+    aspect-ratio:4/5;
+    border-radius:2px;
+    overflow:hidden;
+    background:#1c1c22;
+  }
+  .feat-item img{
     width:100%; height:100%;
     object-fit:cover;
     display:block;
-    filter:saturate(.92) brightness(.9);
-    transition:filter .45s ease;
+    filter:saturate(.94) brightness(.94);
+    transition:filter .4s ease, transform .6s var(--ease-lux);
   }
-  .feat-photo:hover,
-  .feat-photo:focus-visible,
-  .feat-photo.is-active{
-    transform:translateY(calc(-50% - 30px)) scale(1.08) rotate(0deg);
-    box-shadow:0 40px 70px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.1);
-    z-index:80 !important;
+  .feat-item .feat-cap{
+    display:block;
+    margin-top:12px;
+    font-size:12.5px;
+    letter-spacing:.01em;
+    color:#4a4a52;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
-  .feat-photo:hover img,
-  .feat-photo:focus-visible img,
-  .feat-photo.is-active img{
-    filter:none;
+  .feat-item:hover, .feat-item:focus-visible{
+    transform:rotate(0deg) translateY(-10px) scale(1.055);
+    box-shadow:0 26px 54px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+    z-index:6;
   }
-  .feat-photo:focus-visible{outline:none;}
+  .feat-item:hover img, .feat-item:focus-visible img{ filter:none; }
+  .feat-item.is-active{
+    transform:rotate(0deg) translateY(-10px) scale(1.07);
+    box-shadow:0 30px 60px rgba(0,0,0,.6), 0 0 0 2px var(--c-violet), 0 0 40px rgba(138,107,255,.35);
+    z-index:7;
+  }
+  .feat-item.is-active img{ filter:none; }
+  .feat-strip.has-active .feat-item:not(.is-active):not(:hover){
+    opacity:.5;
+    filter:saturate(.7);
+  }
+  .feat-item:focus-visible{outline:none;}
 
-  .feat-card{
-    position:relative;
-    background:linear-gradient(165deg, var(--c-steel), #4d63d9);
-    color:#fff;
+  .feat-panel{
+    position:sticky;
+    top:110px;
+    background:linear-gradient(165deg, #14141c, #0c0c11);
+    border:1px solid var(--hairline);
     border-radius:20px;
-    padding:26px 24px;
-    box-shadow:0 30px 70px rgba(0,0,0,.5), 0 0 60px rgba(111,139,255,.3);
+    padding:28px 26px;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
     overflow:hidden;
   }
-  .feat-card-content{
+  .feat-panel::before{ /* soft gradient glow accent along the top edge */
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--c-violet), var(--c-cyan), var(--c-coral));
+  }
+  .feat-panel .feat-eyebrow{
+    display:block;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .feat-panel h3{
+    margin:0 0 10px;
+    font-size:21px;
+    font-weight:600;
+    line-height:1.3;
+    min-height:1.3em;
+  }
+  .feat-panel p{
+    margin:0;
+    font-size:14.5px;
+    line-height:1.75;
+    color:var(--muted);
+  }
+  .feat-panel .feat-year{
+    display:inline-block;
+    margin-top:16px;
+    font-size:12px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    padding:6px 12px;
+    border:1px solid var(--hairline);
+    border-radius:999px;
+  }
+  .feat-panel-content{
     transition:opacity .25s ease, transform .35s var(--ease-lux), filter .35s ease;
   }
-  .feat-card-content.is-swapping{
+  .feat-panel-content.is-swapping{
     opacity:0;
     filter:blur(6px);
     transform:translateY(6px);
   }
-  .feat-card-title{
-    display:block;
-    margin:0 0 10px;
-    font-size:19px;
-    font-weight:700;
-    line-height:1.3;
-    min-height:1.3em;
-  }
-  .feat-card-desc{
-    margin:0;
-    font-size:14px;
-    line-height:1.75;
-    color:rgba(255,255,255,.85);
-  }
-  .feat-card-year{
-    display:inline-block;
-    margin-top:16px;
-    font-size:11.5px;
-    letter-spacing:.08em;
-    color:rgba(255,255,255,.75);
-  }
-  .feat-card-actions{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-top:22px;
-  }
-  .feat-dl{
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-    background:var(--c-amber);
-    color:#241703;
-    font-weight:700;
-    font-size:13px;
-    padding:11px 20px;
-    border-radius:999px;
-    transition:transform .2s ease, box-shadow .2s ease;
-  }
-  .feat-dl:hover{
-    transform:translateY(-2px);
-    box-shadow:0 10px 24px rgba(255,178,56,.35);
-  }
-  .feat-view{
-    flex-shrink:0;
-    width:40px; height:40px;
-    border-radius:50%;
-    background:var(--c-coral);
-    color:#fff;
-    border:none;
-    font-size:16px;
-    line-height:1;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    transition:transform .2s ease, box-shadow .2s ease;
-  }
-  .feat-view:hover{
-    transform:translateY(-2px) scale(1.05);
-    box-shadow:0 10px 24px rgba(255,91,102,.4);
-  }
   .feat-hint{
-    margin:16px 0 0;
-    font-size:11.5px;
-    color:rgba(255,255,255,.55);
+    margin-top:18px;
+    font-size:12px;
+    color:var(--muted);
+    opacity:.7;
   }
 
   @media (max-width: 900px){
-    .feat-layout{grid-template-columns:1fr; gap:56px;}
-    .feat-stage{margin-bottom:8px;}
+    .feat-layout{grid-template-columns:1fr;}
+    .feat-panel{position:static; top:auto;}
+    .feat-strip{justify-content:center;}
   }
   @media (max-width: 480px){
-    .feat-stage{height:clamp(220px, 62vw, 300px);}
-    .feat-photo{width:clamp(120px, 42vw, 170px);}
+    .feat-intro{margin-top:-20px;}
+    .feat-item{width:clamp(112px, 38vw, 150px);}
+    .feat-strip{gap:26px 16px;}
   }
 
   /* ---------- CONTACT ---------- */
@@ -1742,21 +1743,16 @@
   <p class="feat-intro">Một vài hình ảnh thực tế — sản phẩm, bao bì, ấn phẩm đã hoàn thiện ngoài đời — thay vì chỉ là file thiết kế trên máy.</p>
 
   <div class="feat-layout">
-    <div class="feat-stage">
-      <div class="feat-stack" id="featStack"></div>
-    </div>
+    <div class="feat-strip" id="featStrip"></div>
 
-    <aside class="feat-card">
-      <div class="feat-card-content" id="featCardContent">
-        <span class="feat-card-title" id="featTitle">—</span>
-        <p class="feat-card-desc" id="featCaption">Di chuột (hoặc chạm) vào một tấm ảnh để xem chi tiết.</p>
-        <span class="feat-card-year" id="featYear" style="display:none;"></span>
+    <aside class="feat-panel">
+      <div class="feat-panel-content" id="featPanelContent">
+        <span class="feat-eyebrow" id="featEyebrow">Dự án</span>
+        <h3 id="featTitle">—</h3>
+        <p id="featCaption">Chạm hoặc di chuột vào một tấm ảnh để xem chi tiết.</p>
+        <span class="feat-year" id="featYear" style="display:none;"></span>
       </div>
-      <div class="feat-card-actions">
-        <a class="feat-dl" id="featDownload" href="#" download>⬇ Download</a>
-        <button type="button" class="feat-view" id="featView" aria-label="Xem ảnh lớn">⤢</button>
-      </div>
-      <p class="feat-hint">Chạm vào ảnh để ghim, chạm ảnh khác để chuyển.</p>
+      <p class="feat-hint">Di chuột (hoặc chạm) vào từng ảnh để xem chú thích.</p>
     </aside>
   </div>
 </section>
@@ -2387,8 +2383,8 @@ buildProjectGrid(); // first paint: no animation
    slot — it just won't render. Fill title / caption / year in Vietnamese.
    ========================================================= */
 const FEATURED_ITEMS = [
-  { src: "p01.jpg", title: "Thaifex 2026", caption: "Refreshing flavors, vibrant smoothie energy, and exciting global connections are making THAIFEX 2026 unforgettable!", year: "2026" },
-  { src: "p01.jpg", title: "Thaifex 2026", caption: "Refreshing flavors, vibrant smoothie energy, and exciting global connections are making THAIFEX 2026 unforgettable!", year: "2026" },
+  { src: "", title: "", caption: "p01.jpg", year: "p01.jpg" },
+  { src: "", title: "", caption: "p02.jpg", year: "p02.jpg" },
   { src: "", title: "", caption: "", year: "" },
   { src: "", title: "", caption: "", year: "" },
   { src: "", title: "", caption: "", year: "" },
@@ -2405,101 +2401,101 @@ const FEATURED_ITEMS = [
       year: (it.year || "").trim()
     }));
 
-  const stack = document.getElementById("featStack");
-  const cardContent = document.getElementById("featCardContent");
+  const strip = document.getElementById("featStrip");
+  const panelContent = document.getElementById("featPanelContent");
+  const eyebrowEl = document.getElementById("featEyebrow");
   const titleEl = document.getElementById("featTitle");
   const captionEl = document.getElementById("featCaption");
   const yearEl = document.getElementById("featYear");
-  const downloadEl = document.getElementById("featDownload");
-  const viewBtn = document.getElementById("featView");
-  if (!stack) return;
+  if (!strip) return;
 
   if (!items.length){
     const empty = document.createElement("div");
     empty.className = "project-empty";
     empty.textContent = "Ảnh thực tế sẽ được cập nhật sớm.";
-    stack.appendChild(empty);
-    const actions = document.querySelector(".feat-card-actions");
-    if (actions) actions.style.display = "none";
+    strip.appendChild(empty);
     return;
   }
 
-  const TILTS = [-6, 4, -3, 5, -4, 3]; // deg, cycled per photo
-  const STEP = 90; // px between each photo's left edge — tune for how much they overlap
-
   let activeEl = null;
-  let pinnedIndex = 0; // index the user clicked/tapped — stays shown until another is picked
+  let pinnedIndex = null; // index the user clicked/tapped — stays shown until another is picked
   let swapTimer = null;
 
-  function renderCard(item){
+  function renderPanel(item){
     if (swapTimer) clearTimeout(swapTimer);
-    cardContent.classList.add("is-swapping");
+    panelContent.classList.add("is-swapping");
     swapTimer = setTimeout(() => {
+      eyebrowEl.textContent = item.year ? "Dự án · " + item.year : "Dự án";
       titleEl.textContent = item.title || "—";
       captionEl.textContent = item.caption || "";
       if (item.year){ yearEl.textContent = item.year; yearEl.style.display = "inline-block"; }
       else { yearEl.style.display = "none"; }
-      downloadEl.href = item.src;
-      downloadEl.download = (item.title || "du-an").replace(/\s+/g, "-").toLowerCase();
-      viewBtn.onclick = () => openLightbox(item.src, item.title || "Ảnh dự án thực tế");
-      cardContent.classList.remove("is-swapping");
+      panelContent.classList.remove("is-swapping");
     }, prefersReducedMotion ? 0 : 140);
   }
 
   items.forEach((item, i) => {
-    const photo = document.createElement("button");
-    photo.type = "button";
-    photo.className = "feat-photo";
-    photo.style.setProperty("--x", (i * STEP) + "px");
-    photo.style.setProperty("--z", String(i + 1));
-    photo.style.setProperty("--tilt", TILTS[i % TILTS.length] + "deg");
-    photo.setAttribute("aria-label", item.title || ("Ảnh dự án " + (i + 1)));
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "feat-item";
+    card.setAttribute("aria-label", item.title || ("Ảnh dự án " + (i + 1)));
 
+    const thumb = document.createElement("span");
+    thumb.className = "feat-thumb";
     const img = document.createElement("img");
     img.src = item.src;
     img.alt = item.title || "Ảnh dự án thực tế";
     img.loading = "lazy";
-    photo.appendChild(img);
+    thumb.appendChild(img);
+    card.appendChild(thumb);
+
+    if (item.title){
+      const cap = document.createElement("span");
+      cap.className = "feat-cap";
+      cap.textContent = item.title;
+      card.appendChild(cap);
+    }
 
     const select = (pin) => {
       if (activeEl) activeEl.classList.remove("is-active");
-      photo.classList.add("is-active");
-      activeEl = photo;
+      card.classList.add("is-active");
+      strip.classList.add("has-active");
+      activeEl = card;
       if (pin) pinnedIndex = i;
-      renderCard(item);
+      renderPanel(item);
     };
 
-    photo.addEventListener("pointerenter", (e) => {
+    card.addEventListener("pointerenter", (e) => {
       if (e.pointerType === "touch") return; // touch devices use click below
       select(false);
     });
-    photo.addEventListener("click", () => select(true));
-    photo.addEventListener("focus", () => select(false));
+    card.addEventListener("click", () => select(true));
+    card.addEventListener("focus", () => select(false));
 
-    stack.appendChild(photo);
+    strip.appendChild(card);
   });
 
-  // Restore the pinned (clicked) photo when the pointer leaves an unpinned hover.
-  stack.addEventListener("pointerleave", () => {
-    const photos = stack.querySelectorAll(".feat-photo");
-    const pinnedPhoto = photos[pinnedIndex];
-    if (pinnedPhoto && pinnedPhoto !== activeEl){
+  // Restore the pinned (clicked) card when the pointer leaves an unpinned hover.
+  strip.addEventListener("pointerleave", () => {
+    if (pinnedIndex === null) return;
+    const cards = strip.querySelectorAll(".feat-item");
+    const pinnedCard = cards[pinnedIndex];
+    if (pinnedCard && pinnedCard !== activeEl){
       activeEl && activeEl.classList.remove("is-active");
-      pinnedPhoto.classList.add("is-active");
-      activeEl = pinnedPhoto;
-      renderCard(items[pinnedIndex]);
+      pinnedCard.classList.add("is-active");
+      activeEl = pinnedCard;
+      renderPanel(items[pinnedIndex]);
     }
   });
 
-  // Last photo (topmost / frontmost in the stack) is active by default.
-  const photos = stack.querySelectorAll(".feat-photo");
-  const startIndex = items.length - 1;
-  const startPhoto = photos[startIndex];
-  if (startPhoto){
-    startPhoto.classList.add("is-active");
-    activeEl = startPhoto;
-    pinnedIndex = startIndex;
-    renderCard(items[startIndex]);
+  // First photo is active by default so the panel never looks empty.
+  const firstCard = strip.querySelector(".feat-item");
+  if (firstCard){
+    firstCard.classList.add("is-active");
+    strip.classList.add("has-active");
+    activeEl = firstCard;
+    pinnedIndex = 0;
+    renderPanel(items[0]);
   }
 })();
 
