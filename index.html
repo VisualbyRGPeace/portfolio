@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welcome To My Show</title>
+<link rel="preload" as="image" href="Logo-port.png" fetchpriority="high">
+<noscript><style>.hero-content h1 .hero-logo{opacity:1!important;filter:none!important;transform:none!important;animation:none!important}</style></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -189,6 +191,11 @@
     padding:0 16px;
     pointer-events:none;
   }
+  /* Desktop/tablet: sit the logo a bit lower so there is less empty black
+     space underneath. Raise this % to move it down, lower it to move it up. */
+  @media (min-width: 761px){
+    .hero-content{ top:56%; }
+  }
   .hero-content .btn{ pointer-events:auto; }
   .hero-content h1{
     font-size:clamp(26px, 4.4vw, 40px);
@@ -209,6 +216,8 @@
     display:block;
     margin:0 auto;
     width:clamp(220px, 48vw, 540px);
+  }
+  .hero-content h1 .hero-logo-wrap.is-ready{
     animation:
       logoFloat 7s ease-in-out 2.2s infinite,
       logoGlow 5s ease-in-out 2.2s infinite;
@@ -220,7 +229,9 @@
     opacity:0;
     filter:blur(28px);
     transform:scale(.94);
-    animation:logoReveal 2.6s cubic-bezier(.22,.75,.3,1) .2s forwards;
+  }
+  .hero-content h1 .is-ready .hero-logo{
+    animation:logoReveal 2.6s cubic-bezier(.22,.75,.3,1) .1s forwards;
   }
   .hero-content h1 .hero-logo-wrap::after{
     content:'';
@@ -232,6 +243,8 @@
     background-position:100% 0;
     -webkit-mask:var(--logo-src) center / 100% 100% no-repeat;
     mask:var(--logo-src) center / 100% 100% no-repeat;
+  }
+  .hero-content h1 .hero-logo-wrap.is-ready::after{
     animation:
       logoShineIn .8s ease 2.6s forwards,
       logoShine 5s cubic-bezier(.45,.05,.25,1) 2.6s infinite;
@@ -1390,7 +1403,9 @@
     .more, .more-inner, .skill-arrow, .skill-cta svg{transition:none;}
     .portrait-blur{animation:none; display:none;}
     .hero-content h1 .hero-logo-wrap,
-    .hero-content h1 .hero-logo-wrap::after{animation:none;}
+    .hero-content h1 .hero-logo-wrap.is-ready,
+    .hero-content h1 .hero-logo-wrap.is-ready::after,
+    .hero-content h1 .is-ready .hero-logo{animation:none;}
     .hero-content h1 .hero-logo-wrap::after{display:none;}
     .hero-content h1 .hero-logo{animation:none; opacity:1; filter:none; transform:none;}
     .project-grid{transition:none;}
@@ -1413,7 +1428,7 @@
 <section class="hero" style="border-top:none; padding-top:140px;">
   <div class="orbit" id="orbit"></div>
   <div class="hero-content">
-    <h1><span class="hero-logo-wrap"><img src="Logo-port.png" alt="Glow In The Dark" class="hero-logo"></span></h1>
+    <h1><span class="hero-logo-wrap"><img src="Logo-port.png" alt="Glow In The Dark" class="hero-logo" fetchpriority="high" decoding="async"></span></h1>
   </div>
 </section>
 
@@ -1681,6 +1696,23 @@
 </div>
 
 <script>
+/* Hero logo: wait until the image is fully downloaded AND decoded, then start
+   the reveal — so it never plays on a half-loaded (cut-off) picture. */
+(function initHeroLogo(){
+  const wrap = document.querySelector(".hero-logo-wrap");
+  const img = wrap && wrap.querySelector("img");
+  if (!wrap || !img) return;
+  let done = false;
+  const go = () => { if (done) return; done = true; wrap.classList.add("is-ready"); };
+  const ready = () => { (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(go); };
+  if (img.complete && img.naturalWidth) ready();
+  else {
+    img.addEventListener("load", ready);
+    img.addEventListener("error", go);
+  }
+  setTimeout(go, 8000); // safety net on very slow connections
+})();
+
 /* =========================================================
    0) YOUR PORTRAIT (About Me)
    Paste a DIRECT image link between the quotes (same kind of link you use
@@ -1764,7 +1796,7 @@ function getGeometryRatios(w){
   // keeping a consistent gap above the title on every phone size.
   if (w <= 480)  return { radius: 0.62, centerY: 0.50 };
   if (w <= 760)  return { radius: 0.60, centerY: 0.55 };
-  return { radius: 0.66, centerY: 0.86 };
+  return { radius: 0.66, centerY: 0.92 };
 }
 
 function measure(){
@@ -1799,6 +1831,8 @@ function buildCards(){
     img.src = item.src;
     img.alt = "Portfolio image " + (i + 1);
     img.loading = "lazy";
+    img.decoding = "async";
+    img.fetchPriority = "low"; // let the logo download first
     inner.appendChild(img);
     card.appendChild(inner);
     orbit.appendChild(card);
