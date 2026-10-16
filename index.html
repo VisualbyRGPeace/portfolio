@@ -184,7 +184,7 @@
     position:absolute;
     top:50%; left:50%;
     transform:translate(-50%,-50%);
-    z-index:10;
+    z-index:16; /* above the hero's bottom fade (z-index:15) so a low logo is never dimmed */
     text-align:center;
     max-width:680px;
     width:100%;
@@ -194,7 +194,7 @@
   /* Desktop/tablet: sit the logo a bit lower so there is less empty black
      space underneath. Raise this % to move it down, lower it to move it up. */
   @media (min-width: 761px){
-    .hero-content{ top:56%; }
+    .hero-content{ top:78%; }
   }
   .hero-content .btn{ pointer-events:auto; }
   .hero-content h1{
