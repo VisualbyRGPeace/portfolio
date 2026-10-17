@@ -286,6 +286,9 @@
     filter:blur(var(--wipe-blur));
     -webkit-mask-origin:content-box;  mask-origin:content-box;
     -webkit-mask-clip:border-box;     mask-clip:border-box;
+    /* the wipe gradient only varies left->right, so repeat it upwards and
+       downwards: the padded bleed area above/below stays covered (no cut) */
+    -webkit-mask-repeat:no-repeat repeat;  mask-repeat:no-repeat repeat;
     visibility:hidden;
   }
   .logo-slide.in .ls-blur,
