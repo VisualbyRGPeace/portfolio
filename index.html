@@ -1328,19 +1328,30 @@
     align-items:center;
     justify-content:center;
     padding:24px;
-    background:rgba(4,4,8,.6);
-    backdrop-filter:blur(14px) saturate(140%);
-    -webkit-backdrop-filter:blur(14px) saturate(140%);
-    opacity:0;
+    background:rgba(4,4,8,0);
+    -webkit-backdrop-filter:blur(0px) saturate(100%);
+            backdrop-filter:blur(0px) saturate(100%);
     visibility:hidden;
     pointer-events:none;
-    transition:opacity .4s ease, visibility 0s linear .4s;
+    /* CLOSING: backdrop un-blurs smoothly, then the layer is hidden */
+    transition:
+      background-color .55s ease,
+      backdrop-filter .55s ease,
+      -webkit-backdrop-filter .55s ease,
+      visibility 0s linear .6s;
   }
   .contact-overlay.is-open{
-    opacity:1;
+    background:rgba(4,4,8,.6);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+            backdrop-filter:blur(14px) saturate(140%);
     visibility:visible;
     pointer-events:auto;
-    transition:opacity .4s ease, visibility 0s linear 0s;
+    /* OPENING: the room slowly dims and blurs behind the card */
+    transition:
+      background-color .7s ease,
+      backdrop-filter .8s ease,
+      -webkit-backdrop-filter .8s ease,
+      visibility 0s linear 0s;
   }
   .contact-card{
     position:relative;
@@ -1353,26 +1364,38 @@
     backdrop-filter:blur(30px) saturate(160%);
     -webkit-backdrop-filter:blur(30px) saturate(160%);
     box-shadow:0 40px 100px -24px rgba(0,0,0,.65);
-    transform:translateY(22px) scale(.96);
+    transform:translateY(26px) scale(.9);
     opacity:0;
-    transition:transform .55s var(--ease-lux), opacity .45s ease;
+    /* CLOSING: shrinks and sinks away a little faster than it came in */
+    transition:transform .5s cubic-bezier(.55,0,.75,.4), opacity .4s ease .05s;
   }
   .contact-overlay.is-open .contact-card{
     transform:translateY(0) scale(1);
     opacity:1;
+    /* OPENING: soft, slightly springy landing */
+    transition:transform 1s cubic-bezier(.16,1,.3,1), opacity .6s ease;
   }
-  .contact-card-glow{
-    position:absolute;
-    top:-30%; left:-20%;
-    width:75%; height:65%;
-    background:radial-gradient(circle, color-mix(in srgb, var(--c-violet) 55%, transparent), transparent 70%);
-    filter:blur(30px);
-    pointer-events:none;
+
+  /* one soft light sweep across the glass right after it opens */
+  .contact-card::after{
+    content:'';
+    position:absolute; inset:0;
     z-index:0;
+    pointer-events:none;
+    border-radius:inherit;
+    background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.16) 50%, transparent 62%);
+    background-size:300% 100%;
+    background-position:100% 0;
+    opacity:0;
   }
-  .contact-card-glow.two{
-    top:auto; left:auto; bottom:-25%; right:-20%;
-    background:radial-gradient(circle, color-mix(in srgb, var(--c-cyan) 45%, transparent), transparent 70%);
+  .contact-overlay.is-open .contact-card::after{
+    animation:cardSheen 1.8s cubic-bezier(.45,.05,.25,1) .35s both;
+  }
+  @keyframes cardSheen{
+    0%  { background-position:100% 0; opacity:0; }
+    15% { opacity:1; }
+    85% { opacity:1; }
+    100%{ background-position:0% 0;   opacity:0; }
   }
   .contact-card-close{
     position:absolute;
@@ -1456,7 +1479,59 @@
     text-align:right;
   }
   .ci-value a{transition:color .25s ease;}
-  .ci-value a:hover, .ci-value a:focus-visible{color:var(--c-cyan);}
+  .ci-value a:hover, .ci-value a:focus-visible{color:#b6ff8f;}
+
+  /* Content reveals one piece at a time (title -> name -> each row) and
+     leaves quickly in one go. --i is the order of each piece. */
+  .contact-card-eyebrow{ --i:0; }
+  .contact-card-name{ --i:1; }
+  .contact-card-info li:nth-child(1){ --i:2; }
+  .contact-card-info li:nth-child(2){ --i:3; }
+  .contact-card-info li:nth-child(3){ --i:4; }
+  .contact-card-info li:nth-child(4){ --i:5; }
+  .contact-card-eyebrow,
+  .contact-card-name,
+  .contact-card-info li{
+    opacity:0;
+    transform:translateY(18px);
+    filter:blur(7px);
+    transition:opacity .25s ease, transform .3s ease, filter .3s ease;   /* closing */
+  }
+  .contact-overlay.is-open .contact-card-eyebrow,
+  .contact-overlay.is-open .contact-card-name,
+  .contact-overlay.is-open .contact-card-info li{
+    opacity:1;
+    transform:translateY(0);
+    filter:blur(0);
+    transition:
+      opacity .7s ease,
+      transform .9s cubic-bezier(.16,1,.3,1),
+      filter .8s ease;
+    transition-delay:calc(.3s + var(--i) * .08s);                        /* opening */
+  }
+  /* the little ✕ spins in and out */
+  .contact-card-close{
+    opacity:0;
+    transform:scale(.5) rotate(-120deg);
+    transition:opacity .25s ease, transform .35s ease, background .2s ease;
+  }
+  .contact-overlay.is-open .contact-card-close{
+    opacity:1;
+    transform:scale(1) rotate(0deg);
+    transition:opacity .6s ease .55s, transform .9s cubic-bezier(.16,1,.3,1) .55s, background .2s ease;
+  }
+  .contact-overlay.is-open .contact-card-close:hover{
+    background:rgba(255,255,255,.16);
+    transform:scale(1.1) rotate(90deg);
+    transition:transform .35s ease, background .2s ease;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .contact-overlay.is-open .contact-card::after{ animation:none; }
+    .contact-card-eyebrow, .contact-card-name, .contact-card-info li{ filter:none; transform:none; }
+    .contact-overlay.is-open .contact-card-eyebrow,
+    .contact-overlay.is-open .contact-card-name,
+    .contact-overlay.is-open .contact-card-info li{ transition-delay:0s; }
+  }
 
   @media (max-width: 480px){
     .contact-card{padding:28px 22px 24px; border-radius:22px;}
@@ -1795,8 +1870,6 @@
 <!-- ============ CONTACT MODAL (glass / blur, opens on any "Contact" click) ============ -->
 <div class="contact-overlay" id="contactOverlay" aria-hidden="true">
   <div class="contact-card" role="dialog" aria-modal="true" aria-labelledby="contactCardName">
-    <span class="contact-card-glow" aria-hidden="true"></span>
-    <span class="contact-card-glow two" aria-hidden="true"></span>
     <button class="contact-card-close" id="contactCardClose" aria-label="Close">✕</button>
     <div class="contact-card-top">
       <div class="contact-card-eyebrow">
