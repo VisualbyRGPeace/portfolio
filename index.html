@@ -55,7 +55,26 @@
     padding:28px 6vw;
     z-index:50;
     background:linear-gradient(to bottom, rgba(7,7,11,0.85), transparent);
+    transition:padding .35s var(--ease-lux), background .35s ease;
   }
+  /* Once the page scrolls, the bar becomes a frosted-glass strip so the content
+     passing underneath is blurred + dimmed instead of colliding with the links. */
+  header::before{
+    content:'';
+    position:absolute; inset:0; z-index:-1;
+    background:rgba(7,7,11,.82);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    backdrop-filter:blur(16px) saturate(140%);
+    border-bottom:1px solid var(--hairline);
+    opacity:0;
+    transition:opacity .35s ease;
+    pointer-events:none;
+  }
+  header.is-scrolled{
+    background:none;
+    padding-top:14px; padding-bottom:14px;   /* slimmer bar while scrolling */
+  }
+  header.is-scrolled::before{opacity:1;}
   nav{
     display:flex;
     gap:34px;
@@ -2247,11 +2266,11 @@
     <i class="case-progress" id="caseProgress"></i>
   </div>
   <div class="case-inner">
-    <header class="case-intro">
+    <div class="case-intro">
       <span class="case-kicker">Branding</span>
       <h2 id="caseHeading"></h2>
       <p id="caseDesc"></p>
-    </header>
+    </div>
     <div class="case-pages" id="casePages"></div>
     <div class="case-end"><button type="button" id="caseBack">← Quay lại dự án</button></div>
   </div>
@@ -2989,6 +3008,15 @@ function buildProjectGrid(opts = {}){
 
 buildFilters();
 buildProjectGrid(); // first paint: no animation
+
+/* Top bar: switch to the frosted-glass style as soon as the page is scrolled */
+(function initHeaderScroll(){
+  const bar = document.querySelector("body > header");
+  if (!bar) return;
+  const update = () => bar.classList.toggle("is-scrolled", window.scrollY > 24);
+  window.addEventListener("scroll", update, { passive:true });
+  update();
+})();
 
 /* =========================================================
    BRANDING CASE STUDY — Behance-style scrolling page (A4 landscape pages)
