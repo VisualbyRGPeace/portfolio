@@ -272,24 +272,28 @@
     -webkit-mask-size:300% 100%;             mask-size:300% 100%;
     -webkit-mask-position:100% 0;            mask-position:100% 0;
   }
-  /* The blurred copy is padded on every side so the blur can spread past the
-     picture's edge instead of being chopped off in a hard rectangle.
-     mask-origin keeps the wipe geometry identical to the sharp layers. */
+  /* The blurred copy lives in a wrapper that is LARGER than the picture on all
+     four sides (by --bleed). The mask is applied to that bigger wrapper, so
+     the blur can spread past the picture's edge instead of being chopped off
+     in a hard rectangle. Mask size / position are written in px (from
+     --logo-w) so the wipe lines up exactly with the sharp layers. */
   .logo-slide .ls-blur{
     position:absolute;
-    box-sizing:content-box;
-    left:calc(var(--bleed) * -1);
     top:calc(var(--bleed) * -1);
-    width:100%;
-    height:100%;
+    right:calc(var(--bleed) * -1);
+    bottom:calc(var(--bleed) * -1);
+    left:calc(var(--bleed) * -1);
     padding:var(--bleed);
-    filter:blur(var(--wipe-blur));
-    -webkit-mask-origin:content-box;  mask-origin:content-box;
-    -webkit-mask-clip:border-box;     mask-clip:border-box;
-    /* the wipe gradient only varies left->right, so repeat it upwards and
-       downwards: the padded bleed area above/below stays covered (no cut) */
-    -webkit-mask-repeat:no-repeat repeat;  mask-repeat:no-repeat repeat;
     visibility:hidden;
+    -webkit-mask-repeat:repeat;  mask-repeat:repeat;      /* tile ends are transparent -> seamless */
+    -webkit-mask-size:calc(var(--logo-w) * 3) 100%;  mask-size:calc(var(--logo-w) * 3) 100%;
+    -webkit-mask-position:calc(var(--bleed) - var(--logo-w) * 2) 0;
+            mask-position:calc(var(--bleed) - var(--logo-w) * 2) 0;
+  }
+  .logo-slide .ls-blur img{
+    display:block;
+    width:100%; height:100%;
+    filter:blur(var(--wipe-blur));
   }
   .logo-slide.in .ls-blur,
   .logo-slide.out .ls-blur{ visibility:visible; }
@@ -313,12 +317,12 @@
   .logo-slide.out .ls-blur{            /* old logo, blurred: just ahead of the edge */
     -webkit-mask-image:linear-gradient(90deg,transparent 45%,#000 55%,transparent 65%);
             mask-image:linear-gradient(90deg,transparent 45%,#000 55%,transparent 65%);
-    animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
+    animation:logoWipeBlur var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
   }
   .logo-slide.in .ls-blur{             /* new logo, blurred: right at the edge */
     -webkit-mask-image:linear-gradient(90deg,transparent 35%,#000 45%,transparent 55%);
             mask-image:linear-gradient(90deg,transparent 35%,#000 45%,transparent 55%);
-    animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
+    animation:logoWipeBlur var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
   }
   .logo-slide.in .ls-sharp{            /* new logo, sharp: clear behind the edge */
     -webkit-mask-image:linear-gradient(90deg,#000 0,#000 38.33%,transparent 55%,transparent 100%);
@@ -326,6 +330,10 @@
     animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
   }
   .logo-slide.is-current .ls-sharp{ -webkit-mask-image:none; mask-image:none; }
+  @keyframes logoWipeBlur{
+    from{ -webkit-mask-position:calc(var(--bleed) - var(--logo-w) * 2) 0; mask-position:calc(var(--bleed) - var(--logo-w) * 2) 0; }
+    to  { -webkit-mask-position:var(--bleed) 0;                            mask-position:var(--bleed) 0; }
+  }
   @keyframes logoWipe{
     from{ -webkit-mask-position:100% 0; mask-position:100% 0; }
     to  { -webkit-mask-position:0% 0;   mask-position:0% 0;   }
@@ -1529,15 +1537,15 @@
     <h1><span class="hero-logo-wrap"><span class="logo-stage">
       <span class="logo-slide is-current">
         <img class="ls-sharp" src="Logo-port.png" alt="Glow In The Dark" fetchpriority="high" decoding="async">
-        <img class="ls-blur"  src="Logo-port.png" alt="" aria-hidden="true" decoding="async">
+        <span class="ls-blur" aria-hidden="true"><img src="Logo-port.png" alt="" decoding="async"></span>
       </span>
       <span class="logo-slide">
         <img class="ls-sharp" src="Logo-port01.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
-        <img class="ls-blur"  src="Logo-port01.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
+        <span class="ls-blur" aria-hidden="true"><img src="Logo-port01.png" alt="" fetchpriority="low" decoding="async"></span>
       </span>
       <span class="logo-slide">
         <img class="ls-sharp" src="Logo-port02.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
-        <img class="ls-blur"  src="Logo-port02.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
+        <span class="ls-blur" aria-hidden="true"><img src="Logo-port02.png" alt="" fetchpriority="low" decoding="async"></span>
       </span>
     </span></span></h1>
   </div>
