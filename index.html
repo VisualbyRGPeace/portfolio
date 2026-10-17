@@ -213,14 +213,25 @@
   .hero-content h1 .hero-logo-wrap{
     --logo-src:url("Logo-port.png");
     position:relative;
+    isolation:isolate;
     display:block;
     margin:0 auto;
     width:clamp(220px, 48vw, 540px);
   }
   .hero-content h1 .hero-logo-wrap.is-ready{
-    animation:
-      logoFloat 7s ease-in-out 2.2s infinite,
-      logoGlow 5s ease-in-out 2.2s infinite;
+    animation:logoFloat 7s ease-in-out 2.2s infinite;
+  }
+  .hero-content h1 .hero-logo-wrap::before{
+    content:'';
+    position:absolute; inset:-22% -14%;
+    z-index:-1;
+    pointer-events:none;
+    border-radius:50%;
+    background:radial-gradient(closest-side, rgba(138,255,120,.30), rgba(138,255,120,0) 72%);
+    opacity:0;
+  }
+  .hero-content h1 .hero-logo-wrap.is-ready::before{
+    animation:logoGlow 5s ease-in-out 2.2s infinite;
   }
   /* the stage holds all 3 logos; the reveal (fade + blur -> sharp) runs on it */
   .hero-content h1 .logo-stage{
@@ -255,13 +266,13 @@
     width:100%;
     height:auto;
     -webkit-mask-repeat:no-repeat;           mask-repeat:no-repeat;
-    -webkit-mask-size:400% 100%;             mask-size:400% 100%;
+    -webkit-mask-size:300% 100%;             mask-size:300% 100%;
     -webkit-mask-position:100% 0;            mask-position:100% 0;
   }
   .logo-slide .ls-blur{
     position:absolute; inset:0;
     height:100%;
-    filter:blur(var(--wipe-blur, 15px));
+    filter:blur(var(--wipe-blur, 18px));
     visibility:hidden;
   }
   .logo-slide.in .ls-blur,
@@ -273,24 +284,32 @@
   .logo-slide.in  .ls-blur { z-index:1; }
   .logo-slide.in  .ls-sharp{ position:relative; z-index:2; }
 
-  /* masks: all share the same moving "edge"; only their soft bands differ */
-  .logo-slide.in .ls-sharp{            /* new logo: clear behind the edge */
-    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 43.75%,transparent 56.25%,transparent 100%);
-            mask-image:linear-gradient(90deg,#000 0,#000 43.75%,transparent 56.25%,transparent 100%);
-    animation:logoWipe var(--wipe-dur, 2.4s) cubic-bezier(.65,0,.35,1) forwards;
+  /* masks: all four layers share ONE moving edge; only their soft bands differ.
+     Seen from the right (not yet reached) to the left (already reached):
+        old sharp  ->  old blurred  ->  new blurred  ->  new sharp
+     Each neighbouring pair cross-fades, and the old logo is fully masked away
+     behind the edge, so nothing of it can show through the new logo. */
+  .logo-slide.out .ls-sharp{           /* old logo, sharp: vanishes behind the edge */
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,transparent 43.33%,#000 55%,#000 100%);
+            mask-image:linear-gradient(90deg,transparent 0,transparent 43.33%,#000 55%,#000 100%);
+    animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
   }
-  .logo-slide.in .ls-blur{             /* new logo: blurred right at the edge */
-    -webkit-mask-image:linear-gradient(90deg,transparent 41.25%,#000 48.75%,transparent 56.25%);
-            mask-image:linear-gradient(90deg,transparent 41.25%,#000 48.75%,transparent 56.25%);
-    animation:logoWipe var(--wipe-dur, 2.4s) cubic-bezier(.65,0,.35,1) forwards;
+  .logo-slide.out .ls-blur{            /* old logo, blurred: just ahead of the edge */
+    -webkit-mask-image:linear-gradient(90deg,transparent 45%,#000 55%,transparent 65%);
+            mask-image:linear-gradient(90deg,transparent 45%,#000 55%,transparent 65%);
+    animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
   }
-  .logo-slide.out .ls-blur{            /* old logo: blurs just ahead of the edge */
-    -webkit-mask-image:linear-gradient(90deg,transparent 48.75%,#000 56.25%,transparent 63.75%);
-            mask-image:linear-gradient(90deg,transparent 48.75%,#000 56.25%,transparent 63.75%);
-    animation:logoWipe var(--wipe-dur, 2.4s) cubic-bezier(.65,0,.35,1) forwards;
+  .logo-slide.in .ls-blur{             /* new logo, blurred: right at the edge */
+    -webkit-mask-image:linear-gradient(90deg,transparent 35%,#000 45%,transparent 55%);
+            mask-image:linear-gradient(90deg,transparent 35%,#000 45%,transparent 55%);
+    animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
   }
-  .logo-slide.is-current .ls-sharp,
-  .logo-slide.out .ls-sharp{ -webkit-mask-image:none; mask-image:none; }
+  .logo-slide.in .ls-sharp{            /* new logo, sharp: clear behind the edge */
+    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 38.33%,transparent 55%,transparent 100%);
+            mask-image:linear-gradient(90deg,#000 0,#000 38.33%,transparent 55%,transparent 100%);
+    animation:logoWipe var(--wipe-dur, 4.2s) var(--wipe-ease, cubic-bezier(.37,0,.63,1)) forwards;
+  }
+  .logo-slide.is-current .ls-sharp{ -webkit-mask-image:none; mask-image:none; }
   @keyframes logoWipe{
     from{ -webkit-mask-position:100% 0; mask-position:100% 0; }
     to  { -webkit-mask-position:0% 0;   mask-position:0% 0;   }
@@ -315,7 +334,7 @@
   @keyframes logoReveal{
     0%   { opacity:0; filter:blur(28px); transform:scale(.94); }
     40%  { opacity:1; filter:blur(22px); transform:scale(.97); }
-    100% { opacity:1; filter:blur(0);    transform:scale(1); }
+    100% { opacity:1; filter:none;       transform:scale(1); }
   }
   /* step 2: slow floating + breathing glow */
   @keyframes logoFloat{
@@ -323,8 +342,8 @@
     50%    { transform:translateY(-10px); }
   }
   @keyframes logoGlow{
-    0%,100%{ filter:drop-shadow(0 0 10px rgba(138,255,120,.10)); }
-    50%    { filter:drop-shadow(0 0 26px rgba(138,255,120,.38)); }
+    0%,100%{ opacity:.25; }
+    50%    { opacity:.85; }
   }
   /* step 3: light band travels left → right, pauses, repeats forever */
   @keyframes logoShineIn{ to{ opacity:1; } }
@@ -1468,7 +1487,8 @@
     .hero-content h1 .hero-logo-wrap.is-ready,
     .hero-content h1 .hero-logo-wrap.is-ready::after,
     .hero-content h1 .is-ready .logo-stage{animation:none;}
-    .hero-content h1 .hero-logo-wrap::after{display:none;}
+    .hero-content h1 .hero-logo-wrap::after,
+    .hero-content h1 .hero-logo-wrap::before{display:none;}
     .hero-content h1 .logo-stage{animation:none; opacity:1; filter:none; transform:none;}
     .project-grid{transition:none;}
     html{scroll-behavior:auto;}
@@ -1783,8 +1803,8 @@
 
   /* ---- timing (milliseconds) – tweak here ---- */
   const REVEAL_MS = 2700;   // intro animation length
-  const HOLD_MS   = 3200;   // how long one logo rests, fully sharp
-  const WIPE_MS   = 2400;   // length of the blur wipe (keep = --wipe-dur in CSS)
+  const HOLD_MS   = 3600;   // how long one logo rests, fully sharp
+  const WIPE_MS   = 4200;   // length of the blur wipe (keep = --wipe-dur in CSS)
 
   let started = false;
   const begin = () => {
