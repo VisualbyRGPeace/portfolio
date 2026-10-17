@@ -1593,60 +1593,261 @@
     html{scroll-behavior:auto;}
   }
 
-  /* ---------- CAREER: scroll-scrubbed video ---------- */
-  #career.scrub{
-    padding:0;
-    border-top:none;                 /* no divider line above the video */
+  /* ---------- CAREER: stacked folders ----------
+     Closed: five rounded rectangles overlap like a filing stack — you only see
+     each folder's title strip. Click one: it opens downward and the folders in
+     front of it slide down, still casting their shadow up onto it. */
+  .folio-sec{
+    --H:72px;                 /* visible title strip of a closed folder */
+    --O:48px;                 /* part of each folder hidden behind the next one */
+    --pad:clamp(22px, 3vw, 40px);
+    --surface:#1c1c27;
+    --surface-lo:#0f0f16;
+  }
+  .folio-hint{
+    margin:-24px 0 8px;
+    font-size:14px;
+    color:var(--muted);
+  }
+  .folio{
+    display:flex;
+    flex-direction:column;
+    padding-top:8px;
+  }
+  .folio-panel{
     position:relative;
-    height:var(--scrub-length, 400vh);   /* the scroll distance that plays the video */
+    margin-top:calc(var(--O) * -1);           /* tucks under the folder before it */
+    scroll-margin-top:110px;
   }
-  #career.scrub + section{ border-top:none; }   /* ...nor between the video and Projects */
-  .sr-only{
-    position:absolute; width:1px; height:1px; margin:-1px; padding:0;
-    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+  .folio-panel:first-child{ margin-top:0; }
+
+  /* shadow wrapper: the drop-shadow falls up onto the folder behind */
+  .folio-shape{
+    position:relative;
+    filter:
+      drop-shadow(0 -10px 16px rgba(0,0,0,.65))
+      drop-shadow(0 0 0 rgba(var(--rgb),0));
+    transition:filter .9s var(--ease-lux);
   }
-  .scrub-pin{
-    position:sticky;
-    top:0;
-    height:100vh;
-    height:100svh;
+  .folio-panel.is-open .folio-shape{
+    filter:
+      drop-shadow(0 -10px 16px rgba(0,0,0,.65))
+      drop-shadow(0 0 24px rgba(var(--rgb),.22));
+  }
+
+  .folio-face{
+    position:relative;
+    border-radius:18px 18px 0 0;
+    background:linear-gradient(180deg, var(--surface), var(--surface-lo));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
     overflow:hidden;
-    background:transparent;          /* the page background shows through */
+    transition:box-shadow .7s ease;
   }
-  .scrub-video{
-    display:block;
-    width:100%;
-    height:100%;
-    object-fit:cover;     /* fills the screen; use "contain" to show the whole frame with bars */
-    background:transparent;
-    /* soft edges: the video dissolves into the page background on all four sides,
-       so there is no visible rectangle or seam. Raise the % for a wider fade. */
-    -webkit-mask-image:
-      linear-gradient(to bottom, transparent 0, #000 16%, #000 84%, transparent 100%),
-      linear-gradient(to right,  transparent 0, #000 8%,  #000 92%, transparent 100%);
-    -webkit-mask-composite:source-in;
-            mask-image:
-      linear-gradient(to bottom, transparent 0, #000 16%, #000 84%, transparent 100%),
-      linear-gradient(to right,  transparent 0, #000 8%,  #000 92%, transparent 100%);
-            mask-composite:intersect;
-  }
-  .scrub-bar{
-    position:absolute;
-    left:6vw; right:6vw;
-    bottom:28px;
-    height:2px;
-    border-radius:2px;
-    background:rgba(255,255,255,.16);
-    overflow:hidden;
+  .folio-panel:last-child .folio-face{ border-radius:18px; }
+  .folio-panel.is-open .folio-face{ box-shadow:inset 0 1px 0 rgba(var(--rgb),.85); }
+  .folio-face::before{                       /* soft colour glow from the top-left corner */
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse 70% 280px at 12% 0%, rgba(var(--rgb),.28), transparent 70%);
+    opacity:.45;
     pointer-events:none;
+    transition:opacity .9s ease;
   }
-  .scrub-bar i{
+  .folio-panel:hover .folio-face::before,
+  .folio-panel.is-open .folio-face::before{ opacity:1; }
+
+  /* ----- title row (the whole strip is the button) ----- */
+  .folio-title{ position:relative; z-index:1; margin:0; font:inherit; }
+  .folio-head{
+    width:100%;
+    height:var(--H);
+    padding:0 var(--pad);
+    display:flex; align-items:center; gap:16px;
+    border:0;
+    background:none;
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    text-align:left;
+    cursor:pointer;
+  }
+  .folio-head:focus-visible{ outline:2px solid #fff; outline-offset:-4px; border-radius:18px; }
+  .folio-no{ font-size:14px; font-weight:700; color:var(--accent); }
+  .folio-name{ font-size:clamp(18px, 2vw, 22px); font-weight:600; letter-spacing:-0.01em; }
+  .folio-plus{
+    position:relative;
+    width:14px; height:14px;
+    flex-shrink:0;
+    margin-left:auto;
+    transition:transform .6s var(--ease-lux);
+  }
+  .folio-plus::before, .folio-plus::after{
+    content:'';
+    position:absolute; left:0; top:50%;
+    width:100%; height:1.5px;
+    background:var(--text);
+    border-radius:1px;
+  }
+  .folio-plus::after{ transform:rotate(90deg); }
+  .folio-panel.is-open .folio-plus{ transform:rotate(45deg); }
+
+  /* ----- content that slides out of the folder ----- */
+  .folio-collapse{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-rows:0fr;
+    padding:0 var(--pad) var(--O);
+    visibility:hidden;
+    transition:grid-template-rows .9s var(--ease-lux), padding .9s var(--ease-lux), visibility 0s .9s;
+  }
+  .folio-panel:last-child .folio-collapse{ padding-bottom:0; }
+  .folio-panel.is-open .folio-collapse{
+    grid-template-rows:1fr;
+    padding-top:10px;
+    padding-bottom:calc(var(--O) + 28px);   /* keeps text clear of the folder in front */
+    visibility:visible;
+    transition:grid-template-rows .9s var(--ease-lux), padding .9s var(--ease-lux), visibility 0s;
+  }
+  .folio-panel:last-child.is-open .folio-collapse{ padding-bottom:40px; }
+  .folio-body{ min-height:0; overflow:hidden; }
+  /* shared bits */
+  .folio-points{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .folio-points li{
+    position:relative;
+    padding-left:18px;
+    font-size:15px;
+    line-height:1.6;
+    color:rgba(255,255,255,.88);
+  }
+  .folio-points li::before{
+    content:'';
+    position:absolute; left:0; top:.68em;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 8px rgba(var(--rgb),.8);
+  }
+  .folio-cta{
+    align-self:flex-start;
+    padding:12px 22px;
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:999px;
+    font-size:14px;
+    font-weight:500;
+    transition:background .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .folio-cta:hover, .folio-cta:focus-visible{ background:#fff; color:#0a0a0c; border-color:#fff; outline:none; }
+
+  /* 01 — work experience: one row per job */
+  .folio-entry{
+    display:grid;
+    grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);
+    gap:clamp(20px, 4vw, 56px);
+    padding:24px 0;
+    border-top:1px solid var(--hairline);
+  }
+  .folio-entry:first-child{ border-top:0; padding-top:0; }
+  .folio-entry:last-child{ padding-bottom:0; }
+  .folio-entry h4{
+    margin:0 0 6px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(18px, 1.8vw, 22px);
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .folio-role{ margin:0; font-size:15px; font-weight:600; color:var(--accent); }
+  .folio-date{ margin:4px 0 0; font-size:13.5px; color:var(--muted); }
+
+  /* 02 — skills: 2 x 2 */
+  .folio-skills{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 clamp(28px, 5vw, 72px);
+  }
+  .folio-skill{ padding:20px 0; border-top:1px solid var(--hairline); }
+  .folio-skill:nth-child(-n+2){ border-top:0; padding-top:0; }
+  .folio-skill:nth-last-child(-n+2){ padding-bottom:0; }
+  .folio-skill h4{
+    margin:0 0 8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(18px, 1.8vw, 22px);
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .folio-skill p{ margin:0; font-size:15px; line-height:1.65; color:rgba(255,255,255,.82); }
+
+  /* 03 — tools: name, meter, how often */
+  .folio-tool{
+    display:grid;
+    grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 110px;
+    align-items:center;
+    gap:clamp(16px, 3vw, 40px);
+    padding:16px 0;
+    border-top:1px solid var(--hairline);
+  }
+  .folio-tool:first-child{ border-top:0; padding-top:0; }
+  .folio-tool:last-child{ padding-bottom:0; }
+  .folio-tool b{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(18px, 1.8vw, 22px);
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+  .folio-tool span{ font-size:14px; color:var(--muted); text-align:right; }
+  .folio-meter{ height:3px; border-radius:3px; background:rgba(255,255,255,.12); overflow:hidden; }
+  .folio-meter i{
     display:block;
-    width:100%; height:100%;
-    background:rgba(255,255,255,.85);
-    transform-origin:left center;
+    height:100%;
+    width:var(--lvl);
+    background:var(--accent);
+    box-shadow:0 0 12px rgba(var(--rgb),.8);
     transform:scaleX(0);
-    will-change:transform;
+    transform-origin:left center;
+    transition:transform .3s ease;
+  }
+  .folio-panel.is-open .folio-meter i{
+    transform:scaleX(1);
+    transition:transform 1.3s var(--ease-lux) .6s;
+  }
+
+  /* 04 — direction */
+  .folio-statement{ display:flex; flex-direction:column; gap:28px; }
+  .folio-statement p{
+    margin:0;
+    max-width:32em;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(20px, 2.3vw, 30px);
+    font-weight:500;
+    line-height:1.35;
+    letter-spacing:-0.01em;
+  }
+
+  /* content develops piece by piece (same blur-in as the contact card) */
+  .folio-item{
+    opacity:0;
+    transform:translateY(16px);
+    filter:blur(8px);
+    transition:opacity .25s ease, transform .25s ease, filter .25s ease;
+  }
+  .folio-panel.is-open .folio-item{
+    opacity:1; transform:none; filter:none;
+    transition:opacity .7s ease, transform .9s var(--ease-lux), filter .8s ease;
+    transition-delay:calc(.35s + var(--k, 0) * .09s);
+  }
+
+  @media (max-width:760px){
+    .folio-sec{ --H:64px; --O:44px; }
+    .folio-entry{ grid-template-columns:1fr; gap:12px; }
+    .folio-skills{ grid-template-columns:1fr; }
+    .folio-skill:nth-child(2){ border-top:1px solid var(--hairline); padding-top:20px; }
+    .folio-skill:nth-last-child(2){ padding-bottom:20px; }
+    .folio-tool{ grid-template-columns:minmax(0,1fr) auto; gap:10px 16px; }
+    .folio-tool .folio-meter{ grid-column:1 / -1; order:3; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .folio-shape, .folio-face, .folio-face::before, .folio-plus, .folio-collapse{ transition:none; }
+    .folio-item, .folio-panel.is-open .folio-item{ transition:none; filter:none; transform:none; }
+    .folio-meter i, .folio-panel.is-open .folio-meter i{ transition:none; }
   }
 </style>
 </head>
@@ -1779,19 +1980,159 @@
   </div>
 </section>
 
-<!-- ============ CAREER (video that plays as you scroll) ============
-     The video stays pinned to the screen while you scroll through this block;
-     the further you scroll, the further the video plays (scroll up = it rewinds).
-     EDIT: put your file next to index.html and change src below.
-     --scrub-length = how much scrolling it takes to play the whole video
-     (400vh = four screen heights; bigger = slower / more scroll). -->
-<section id="career" class="scrub" style="--scrub-length:400vh">
-  <h2 class="sr-only">Career</h2>
-  <div class="scrub-pin">
-    <video class="scrub-video" id="careerVideo" src="career.mp4"
-           muted playsinline preload="auto" disablepictureinpicture
-           tabindex="-1" aria-hidden="true"></video>
-    <div class="scrub-bar" aria-hidden="true"><i></i></div>
+<!-- ============ CAREER (stacked folders) ============
+     Folders overlap like a filing stack; click a title strip to open one.
+     EDIT: text lives inside each .folio-panel. --accent / --rgb = that folder's glow colour.
+     Tool meters: change --lvl (100% = every day, 66% = often). Strip height / overlap: --H, --O in the CSS. -->
+<section id="career" class="folio-sec">
+  <div class="section-head">
+    <h2>Career</h2>
+    <span class="idx">02 — Career</span>
+  </div>
+  <p class="folio-hint">Select a folder to open it.</p>
+  <div class="folio" id="folio">
+    <article class="folio-panel" style="--accent:var(--c-violet); --rgb:138,107,255;">
+      <div class="folio-shape">
+        <div class="folio-face">
+          <h3 class="folio-title">
+            <button class="folio-head" type="button" id="folio-btn-01" aria-expanded="false" aria-controls="folio-body-01">
+              <span class="folio-no">01</span><span class="folio-name">Kinh nghiệm làm việc</span><span class="folio-plus" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="folio-collapse" id="folio-body-01" role="region" aria-labelledby="folio-btn-01">
+            <div class="folio-body">
+              <div class="folio-entry folio-item" style="--k:0">
+                <div>
+                  <h4>Nawon F&amp;B</h4>
+                  <p class="folio-role">Packaging Designer</p>
+                  <p class="folio-date">09/2023 – 03/2024</p>
+                </div>
+                <ul class="folio-points">
+                  <li>Phát triển thiết kế bao bì sản phẩm, triển khai artwork và chuẩn bị file in ấn.</li>
+                  <li>Xây dựng mockup sản phẩm, kiểm tra tính nhất quán của thiết kế và đáp ứng yêu cầu sản xuất.</li>
+                </ul>
+              </div>
+              <div class="folio-entry folio-item" style="--k:1">
+                <div>
+                  <h4>Nawon F&amp;B</h4>
+                  <p class="folio-role">Marketing Designer</p>
+                  <p class="folio-date">03/2024 – Hiện tại</p>
+                </div>
+                <ul class="folio-points">
+                  <li>Thiết kế ấn phẩm marketing cho mạng xã hội, website và các nền tảng thương mại điện tử.</li>
+                  <li>Phát triển catalogue, hồ sơ năng lực công ty và tài liệu hướng dẫn nhận diện thương hiệu.</li>
+                  <li>Sản xuất hình ảnh sản phẩm 3D, thiết kế đồ họa gian hàng triển lãm và video quảng bá.</li>
+                  <li>Triển khai thiết kế từ khâu phát triển ý tưởng đến hoàn thiện file phục vụ truyền thông và sản xuất.</li>
+                </ul>
+              </div>
+              <div class="folio-entry folio-item" style="--k:2">
+                <div>
+                  <h4>Freelance Graphic Designer</h4>
+                  <p class="folio-date">Song song với công việc chính</p>
+                </div>
+                <ul class="folio-points">
+                  <li>Hợp tác với nhiều khách hàng trong các dự án thiết kế thương mại và truyền thông.</li>
+                  <li>Thực hiện poster quảng cáo, ấn phẩm marketing, motion graphics và hậu kỳ hình ảnh.</li>
+                  <li>Linh hoạt triển khai thiết kế theo yêu cầu, mục tiêu và định hướng hình ảnh của từng dự án.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+    <article class="folio-panel" style="--accent:var(--c-amber); --rgb:255,178,56;">
+      <div class="folio-shape">
+        <div class="folio-face">
+          <h3 class="folio-title">
+            <button class="folio-head" type="button" id="folio-btn-02" aria-expanded="false" aria-controls="folio-body-02">
+              <span class="folio-no">02</span><span class="folio-name">Năng lực chuyên môn</span><span class="folio-plus" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="folio-collapse" id="folio-body-02" role="region" aria-labelledby="folio-btn-02">
+            <div class="folio-body">
+              <div class="folio-skills">
+                <div class="folio-skill folio-item" style="--k:0">
+                  <h4>Thiết kế Marketing</h4>
+                  <p>Hình ảnh chiến dịch, quảng cáo kỹ thuật số, mạng xã hội và thương mại điện tử.</p>
+                </div>
+                <div class="folio-skill folio-item" style="--k:1">
+                  <h4>Thiết kế Bao bì &amp; In ấn</h4>
+                  <p>Artwork bao bì, mockup sản phẩm và chuẩn bị file sản xuất.</p>
+                </div>
+                <div class="folio-skill folio-item" style="--k:2">
+                  <h4>Nhận diện Thương hiệu</h4>
+                  <p>Hệ thống nhận diện, brand guideline, typography và bố cục.</p>
+                </div>
+                <div class="folio-skill folio-item" style="--k:3">
+                  <h4>3D &amp; Motion</h4>
+                  <p>Dựng hình, trực quan hóa sản phẩm, rendering và chỉnh sửa video.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+    <article class="folio-panel" style="--accent:var(--c-cyan); --rgb:53,208,255;">
+      <div class="folio-shape">
+        <div class="folio-face">
+          <h3 class="folio-title">
+            <button class="folio-head" type="button" id="folio-btn-03" aria-expanded="false" aria-controls="folio-body-03">
+              <span class="folio-no">03</span><span class="folio-name">Tần suất sử dụng công cụ</span><span class="folio-plus" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="folio-collapse" id="folio-body-03" role="region" aria-labelledby="folio-btn-03">
+            <div class="folio-body">
+              <div class="folio-tool folio-item" style="--k:0">
+                <b>Adobe Photoshop</b>
+                <div class="folio-meter" aria-hidden="true"><i style="--lvl:100%"></i></div>
+                <span>Hằng ngày</span>
+              </div>
+              <div class="folio-tool folio-item" style="--k:1">
+                <b>Adobe Illustrator</b>
+                <div class="folio-meter" aria-hidden="true"><i style="--lvl:100%"></i></div>
+                <span>Hằng ngày</span>
+              </div>
+              <div class="folio-tool folio-item" style="--k:2">
+                <b>Blender 3D</b>
+                <div class="folio-meter" aria-hidden="true"><i style="--lvl:100%"></i></div>
+                <span>Hằng ngày</span>
+              </div>
+              <div class="folio-tool folio-item" style="--k:3">
+                <b>Adobe Premiere Pro</b>
+                <div class="folio-meter" aria-hidden="true"><i style="--lvl:66%"></i></div>
+                <span>Thường xuyên</span>
+              </div>
+              <div class="folio-tool folio-item" style="--k:4">
+                <b>Adobe After Effects</b>
+                <div class="folio-meter" aria-hidden="true"><i style="--lvl:66%"></i></div>
+                <span>Thường xuyên</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+    <article class="folio-panel" style="--accent:var(--c-mint); --rgb:57,227,166;">
+      <div class="folio-shape">
+        <div class="folio-face">
+          <h3 class="folio-title">
+            <button class="folio-head" type="button" id="folio-btn-04" aria-expanded="false" aria-controls="folio-body-04">
+              <span class="folio-no">04</span><span class="folio-name">Định hướng làm việc</span><span class="folio-plus" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="folio-collapse" id="folio-body-04" role="region" aria-labelledby="folio-btn-04">
+            <div class="folio-body">
+              <div class="folio-statement">
+                <p class="folio-item" style="--k:0">Liên tục phát triển kiến thức và kỹ năng trong các lĩnh vực thiết kế thương hiệu, marketing, bao bì và 3D. Hướng đến khả năng thích ứng linh hoạt, tư duy sáng tạo và triển khai các giải pháp thiết kế hiệu quả, đáp ứng mục tiêu truyền thông, yêu cầu thương mại và tiêu chuẩn sản xuất.</p>
+                <a class="folio-cta folio-item" style="--k:1" href="#projects" data-goto-cat="all">Xem các dự án</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -2677,59 +3018,41 @@ document.addEventListener("click", (e) => {
   items.forEach(el => io.observe(el));
 })();
 
-// CAREER: the video plays as the page scrolls (scroll position -> video time).
-(function initScrubVideo(){
-  const section = document.getElementById("career");
-  const video = document.getElementById("careerVideo");
-  if (!section || !video) return;
-  const bar = section.querySelector(".scrub-bar i");
+// CAREER: stacked folders — click a folder's title strip to open it; one open at a time.
+(function initFolio(){
+  const root = document.getElementById("folio");
+  if (!root) return;
+  const panels = Array.from(root.querySelectorAll(".folio-panel"));
 
-  let duration = 0, target = 0, shown = 0, ticking = false;
-
-  const progress = () => {
-    const r = section.getBoundingClientRect();
-    const total = section.offsetHeight - window.innerHeight;
-    if (total <= 0) return 0;
-    return Math.min(Math.max(-r.top / total, 0), 1);
+  const setOpen = (panel, open) => {
+    panel.classList.toggle("is-open", open);
+    panel.querySelector(".folio-head").setAttribute("aria-expanded", open ? "true" : "false");
   };
-  const frame = () => {
-    ticking = false;
-    const p = progress();
-    target = p * duration;
-    if (bar) bar.style.transform = "scaleX(" + p + ")";
-    // glide toward the target instead of jumping, so seeking looks smooth
-    shown += (target - shown) * 0.18;
-    if (Math.abs(target - shown) < 0.005) shown = target;
-    if (duration && Math.abs(video.currentTime - shown) > 0.01 && !video.seeking){
-      try { video.currentTime = shown; } catch (e) {}
+
+  panels.forEach((panel) => {
+    panel.querySelector(".folio-head").addEventListener("click", () => {
+      const wasOpen = panel.classList.contains("is-open");
+      panels.forEach((p) => setOpen(p, p === panel && !wasOpen));
+      if (!wasOpen){
+        // after the folders have slid, bring the opened one into view if it is off-screen
+        setTimeout(() => {
+          const r = panel.getBoundingClientRect();
+          if (r.top < 100 || r.bottom > window.innerHeight - 20){
+            panel.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
+          }
+        }, 800);
+      }
+    });
+  });
+
+  root.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const panel = e.target.closest(".folio-panel");
+    if (panel && panel.classList.contains("is-open")){
+      setOpen(panel, false);
+      panel.querySelector(".folio-head").focus();
     }
-    if (shown !== target) request();
-  };
-  const request = () => { if (!ticking){ ticking = true; requestAnimationFrame(frame); } };
-
-  const ready = () => {
-    if (!video.duration || !isFinite(video.duration)) return;
-    duration = video.duration;
-    request();
-  };
-  video.addEventListener("loadedmetadata", ready);
-  video.addEventListener("durationchange", ready);
-  if (video.readyState >= 1) ready();
-
-  // iOS Safari only paints seeked frames after the video has been "started" once
-  const unlock = () => {
-    const pr = video.play();
-    if (pr && pr.then) pr.then(() => video.pause()).catch(() => {});
-    else video.pause();
-    window.removeEventListener("touchstart", unlock);
-    window.removeEventListener("pointerdown", unlock);
-  };
-  window.addEventListener("touchstart", unlock, { passive:true });
-  window.addEventListener("pointerdown", unlock, { passive:true });
-  video.pause();
-
-  window.addEventListener("scroll", request, { passive:true });
-  window.addEventListener("resize", request);
+  });
 })();
 </script>
 
