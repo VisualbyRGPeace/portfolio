@@ -216,7 +216,10 @@
     isolation:isolate;
     display:block;
     margin:0 auto;
-    width:clamp(220px, 48vw, 540px);
+    --logo-w:clamp(220px, 48vw, 540px);          /* logo width: change size here */
+    --wipe-blur:calc(var(--logo-w) * .033);       /* blur radius, scales with logo */
+    --bleed:calc(var(--logo-w) * .13);            /* room for the blur to spread */
+    width:var(--logo-w);
   }
   .hero-content h1 .hero-logo-wrap.is-ready{
     animation:logoFloat 7s ease-in-out 2.2s infinite;
@@ -269,10 +272,20 @@
     -webkit-mask-size:300% 100%;             mask-size:300% 100%;
     -webkit-mask-position:100% 0;            mask-position:100% 0;
   }
+  /* The blurred copy is padded on every side so the blur can spread past the
+     picture's edge instead of being chopped off in a hard rectangle.
+     mask-origin keeps the wipe geometry identical to the sharp layers. */
   .logo-slide .ls-blur{
-    position:absolute; inset:0;
+    position:absolute;
+    box-sizing:content-box;
+    left:calc(var(--bleed) * -1);
+    top:calc(var(--bleed) * -1);
+    width:100%;
     height:100%;
-    filter:blur(var(--wipe-blur, 18px));
+    padding:var(--bleed);
+    filter:blur(var(--wipe-blur));
+    -webkit-mask-origin:content-box;  mask-origin:content-box;
+    -webkit-mask-clip:border-box;     mask-clip:border-box;
     visibility:hidden;
   }
   .logo-slide.in .ls-blur,
