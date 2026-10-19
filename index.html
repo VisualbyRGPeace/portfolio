@@ -2047,6 +2047,13 @@
     .hdr-right{gap:0;}
     .lang-switch button{padding:5px 8px; font-size:10.5px;}
   }
+
+  /* ---------- orbit photos: soft placeholder, then fade in once loaded ---------- */
+  .orbit-card img.orbit-img{ opacity:0; transition:opacity .7s ease; }
+  .orbit-card img.orbit-img.is-loaded{ opacity:1; }
+  .orbit-card.is-loading .orbit-card-inner{ animation:orbitPulse 1.4s ease-in-out infinite; }
+  @keyframes orbitPulse{ 0%,100%{ background-color:#15151d; } 50%{ background-color:#242430; } }
+  @media (prefers-reduced-motion:reduce){ .orbit-card.is-loading .orbit-card-inner{ animation:none; } }
 </style>
 </head>
 <body>
@@ -2673,6 +2680,7 @@ const PORTRAIT_POSITION = "50% 20%";
    Fill in your own photos in the array below.
    - src: image path (e.g. "images/photo1.jpg" in your repo)
    - glow: glow color on hover (hex code)
+   - thumb: (optional) a SMALL version of the photo shown on the ring; src opens full-size in the lightbox
    ========================================================= */
 const orbitImages = [
   { src: "https://tinyurl.com/4wr6h69c", glow: "#ff6fc9" },
@@ -2752,6 +2760,31 @@ function measure(){
   geo.radius = Math.min(w, h) * RADIUS_RATIO;
 }
 
+/* ---- orbit photo loader: a few at a time instead of all 24 at once ---- */
+const ORBIT_CONCURRENCY = 4;
+const orbitQueue = [];
+let orbitActive = 0, orbitStarted = false;
+function queueOrbitImage(img, src){
+  orbitQueue.push({ img, src });
+  if (orbitStarted) pumpOrbitQueue();
+}
+function pumpOrbitQueue(){
+  while (orbitActive < ORBIT_CONCURRENCY && orbitQueue.length){
+    const { img, src } = orbitQueue.shift();
+    if (!img.isConnected) continue;       // card was rebuilt meanwhile
+    orbitActive++;
+    const done = () => { orbitActive--; pumpOrbitQueue(); };
+    img.addEventListener("load", done, { once:true });
+    img.addEventListener("error", done, { once:true });
+    img.src = src;
+  }
+}
+function startOrbitQueue(){
+  if (orbitStarted) return;
+  orbitStarted = true;
+  pumpOrbitQueue();
+}
+
 function buildCards(){
   orbit.innerHTML = "";
   cardEls.length = 0;
@@ -2766,18 +2799,23 @@ function buildCards(){
     // behind it, so the glow color/light comes from the image itself.
     const glow = document.createElement("div");
     glow.className = "orbit-card-glow";
-    glow.style.backgroundImage = `url("${item.src}")`;
-    card.appendChild(glow);
+    card.appendChild(glow);               // its background is set once the photo has loaded (no duplicate request)
+    card.classList.add("is-loading");
 
     const inner = document.createElement("div");
     inner.className = "orbit-card-inner";
     const img = document.createElement("img");
-    img.src = item.src;
+    img.className = "orbit-img";
     img.alt = "Portfolio image " + (i + 1);
-    img.loading = "lazy";
     img.decoding = "async";
     img.fetchPriority = "low"; // let the logo download first
+    img.addEventListener("load", () => {
+      img.classList.add("is-loaded");
+      card.classList.remove("is-loading");
+      glow.style.backgroundImage = `url("${img.currentSrc || img.src}")`;
+    });
     inner.appendChild(img);
+    queueOrbitImage(img, item.thumb || item.src);   // small version on the ring, full one in the lightbox
     card.appendChild(inner);
     orbit.appendChild(card);
 
@@ -3013,6 +3051,7 @@ const projects = PROJECT_ITEMS
   .filter(item => item.src && item.src.trim() !== "")
   .map(item => ({
     src: item.src.trim(),
+    thumb: (item.thumb || "").trim(),   // optional small version for the grid
     category: item.category,
     tag: CATEGORY_LABEL[item.category] || item.category
   }));
@@ -3179,7 +3218,8 @@ function buildProjectGrid(opts = {}){
     card.className = "project-card" + (isMoreTile ? " more-tile" : "");
 
     const img = document.createElement("img");
-    img.src = p.src;
+    img.src = p.thumb || p.src;
+    img.decoding = "async";
     img.alt = catLabel(p.category) || ("Project " + (i + 1));
     img.loading = "lazy";
     card.appendChild(img);
@@ -3331,6 +3371,7 @@ buildProjectGrid(); // first paint: no animation
       wrap.className = "case-page";
       const im = document.createElement("img");
       im.src = src.trim();
+      im.decoding = "async";
       im.alt = (L(b, "title") || "Branding") + " — " + (i + 1) + "/" + list.length;
       im.loading = i < 2 ? "eager" : "lazy";
       markLoaded(im);
@@ -3616,6 +3657,15 @@ document.addEventListener("click", (e) => {
   });
 })();
 
+/* Start loading the orbit photos right after the hero logo (never later than 1.5 s) */
+(function startOrbitPhotos(){
+  const logo = document.querySelector(".ls-sharp");
+  const go = () => { clearTimeout(tm); startOrbitQueue(); };
+  const tm = setTimeout(startOrbitQueue, 1500);
+  if (!logo || logo.complete) go();
+  else { logo.addEventListener("load", go, { once:true }); logo.addEventListener("error", go, { once:true }); }
+})();
+
 /* =========================================================
    LANGUAGE SWITCH — applies the dictionary to the page
    ========================================================= */
@@ -3642,7 +3692,7 @@ document.addEventListener("click", (e) => {
     applyLang(true);
   }));
 
-  applyLang(true);
+  applyLang(false); // the grid/filters were already built with the right language
 })();
 </script>
 
