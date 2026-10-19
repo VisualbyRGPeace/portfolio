@@ -1704,8 +1704,8 @@
     --H:72px;                 /* visible title strip of a closed folder */
     --O:48px;                 /* part of each folder hidden behind the next one */
     --pad:clamp(22px, 3vw, 40px);
-    --surface:#1c1c27;
-    --surface-lo:#0f0f16;
+    --surface:#1c1c1c;
+    --surface-lo:#0d0d0d;
   }
   .folio-hint{
     margin:-24px 0 8px;
@@ -1735,23 +1735,26 @@
   .folio-panel.is-open .folio-shape{
     filter:
       drop-shadow(0 -10px 16px rgba(0,0,0,.65))
-      drop-shadow(0 0 24px rgba(var(--rgb),.22));
+      drop-shadow(0 0 24px rgba(var(--rgb),.08));
   }
 
   .folio-face{
     position:relative;
     border-radius:18px 18px 0 0;
-    background:linear-gradient(180deg, var(--surface), var(--surface-lo));
+    background:
+      radial-gradient(circle 280px at var(--mx,-999px) var(--my,-999px), rgba(255,255,255,calc(.11 * var(--spot,0))), transparent 70%),
+      linear-gradient(180deg, var(--surface), var(--surface-lo));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
     overflow:hidden;
-    transition:box-shadow .7s ease;
+    transition:box-shadow .7s ease, --spot .6s ease;
   }
+  .folio-panel:hover .folio-face{ --spot:1; }
   .folio-panel:last-child .folio-face{ border-radius:18px; }
-  .folio-panel.is-open .folio-face{ box-shadow:inset 0 1px 0 rgba(var(--rgb),.85); }
+  .folio-panel.is-open .folio-face{ box-shadow:inset 0 1px 0 rgba(var(--rgb),.5); }
   .folio-face::before{                       /* soft colour glow from the top-left corner */
     content:'';
     position:absolute; inset:0;
-    background:radial-gradient(ellipse 70% 280px at 12% 0%, rgba(var(--rgb),.28), transparent 70%);
+    background:radial-gradient(ellipse 70% 280px at 12% 0%, rgba(var(--rgb),.10), transparent 70%);
     opacity:.45;
     pointer-events:none;
     transition:opacity .9s ease;
@@ -1774,7 +1777,7 @@
     cursor:pointer;
   }
   .folio-head:focus-visible{ outline:2px solid #fff; outline-offset:-4px; border-radius:18px; }
-  .folio-no{ font-size:14px; font-weight:700; color:var(--accent); }
+  .folio-no{ font-size:14px; font-weight:700; color:rgba(255,255,255,.5); }
   .folio-name{ font-size:clamp(18px, 2vw, 22px); font-weight:600; letter-spacing:-0.01em; }
   .folio-plus{
     position:relative;
@@ -1828,7 +1831,7 @@
     width:5px; height:5px;
     border-radius:50%;
     background:var(--accent);
-    box-shadow:0 0 8px rgba(var(--rgb),.8);
+    box-shadow:0 0 6px rgba(var(--rgb),.35);
   }
   .folio-cta{
     align-self:flex-start;
@@ -1903,7 +1906,7 @@
     height:100%;
     width:var(--lvl);
     background:var(--accent);
-    box-shadow:0 0 12px rgba(var(--rgb),.8);
+    box-shadow:0 0 8px rgba(var(--rgb),.35);
     transform:scaleX(0);
     transform-origin:left center;
     transition:transform .3s ease;
@@ -1935,6 +1938,71 @@
     opacity:1; transform:none; filter:none;
     transition:opacity .7s ease, transform .9s var(--ease-lux), filter .8s ease;
     transition-delay:calc(.35s + var(--k, 0) * .09s);
+  }
+
+
+  /* ===== CAREER FOLDERS — extra motion (black & white) ===== */
+  @property --spot{ syntax:'<number>'; inherits:true; initial-value:0; }
+  @property --ang { syntax:'<angle>';  inherits:false; initial-value:0deg; }
+
+  /* (a) a thin beam of light that travels around the folder's edge while hovered / open */
+  .folio-face::after{
+    content:'';
+    position:absolute; inset:0;
+    border-radius:inherit;
+    padding:1px;
+    background:conic-gradient(from var(--ang), transparent 0 70%, rgba(255,255,255,.95) 90%, transparent 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .6s ease;
+    animation:folioSpin 4.5s linear infinite;
+    animation-play-state:paused;
+  }
+  .folio-panel:hover .folio-face::after{ opacity:.55; animation-play-state:running; }
+  .folio-panel.is-open .folio-face::after{ opacity:1; animation-play-state:running; }
+  @keyframes folioSpin{ to{ --ang:360deg; } }
+
+  /* (b) a soft light streak sweeps across the title strip on hover */
+  .folio-title::after{
+    content:'';
+    position:absolute; top:0; bottom:0; left:-30%;
+    width:30%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,.12), transparent);
+    transform:translateX(0) skewX(-20deg);
+    opacity:0;
+    pointer-events:none;
+  }
+  .folio-panel:hover .folio-title::after{ animation:folioSweep 1s var(--ease-lux) both; }
+  @keyframes folioSweep{
+    0%  { opacity:0; transform:translateX(0) skewX(-20deg); }
+    20% { opacity:1; }
+    100%{ opacity:0; transform:translateX(480%) skewX(-20deg); }
+  }
+
+  /* (c) title nudges, number brightens, plus turns */
+  .folio-name{ transition:transform .6s var(--ease-lux); }
+  .folio-no{ transition:color .4s ease, transform .6s var(--ease-lux); }
+  .folio-panel:hover .folio-name{ transform:translateX(8px); }
+  .folio-panel:hover .folio-no{ color:#fff; transform:translateX(3px); }
+  .folio-panel:hover:not(.is-open) .folio-plus{ transform:rotate(90deg); }
+
+  /* (d) entrance: folders rise one after another, un-blurring as they land */
+  .folio.folio-anim .folio-panel{
+    opacity:0;
+    transform:translateY(56px) scale(.96);
+    filter:blur(12px);
+    transition:opacity .9s ease, transform 1.2s var(--ease-lux), filter 1s ease;
+    transition-delay:calc(var(--i, 0) * .14s);
+  }
+  .folio.folio-anim .folio-panel.folio-in{ opacity:1; transform:none; filter:none; }
+
+  @media (prefers-reduced-motion:reduce){
+    .folio-face::after, .folio-title::after{ animation:none !important; }
+    .folio-name, .folio-no{ transition:none; }
+    .folio-panel:hover .folio-name, .folio-panel:hover .folio-no{ transform:none; }
   }
 
   @media (max-width:760px){
@@ -2118,7 +2186,7 @@
 
 <!-- ============ CAREER (stacked folders) ============
      Folders overlap like a filing stack; click a title strip to open one.
-     EDIT: text lives inside each .folio-panel. --accent / --rgb = that folder's glow colour.
+     EDIT: text lives inside each .folio-panel. --accent / --rgb = that folder's accent colour (now white for a black & white look).
      Tool meters: change --lvl (100% = every day, 66% = often). Strip height / overlap: --H, --O in the CSS. -->
 <section id="career" class="folio-sec">
   <div class="section-head">
@@ -2127,7 +2195,7 @@
   </div>
   <p class="folio-hint" data-i18n="career.hint">Select a folder to open it.</p>
   <div class="folio" id="folio">
-    <article class="folio-panel" style="--accent:var(--c-violet); --rgb:138,107,255;">
+    <article class="folio-panel" style="--accent:#ffffff; --rgb:255,255,255;">
       <div class="folio-shape">
         <div class="folio-face">
           <h3 class="folio-title">
@@ -2177,7 +2245,7 @@
         </div>
       </div>
     </article>
-    <article class="folio-panel" style="--accent:var(--c-amber); --rgb:255,178,56;">
+    <article class="folio-panel" style="--accent:#ffffff; --rgb:255,255,255;">
       <div class="folio-shape">
         <div class="folio-face">
           <h3 class="folio-title">
@@ -2210,7 +2278,7 @@
         </div>
       </div>
     </article>
-    <article class="folio-panel" style="--accent:var(--c-cyan); --rgb:53,208,255;">
+    <article class="folio-panel" style="--accent:#ffffff; --rgb:255,255,255;">
       <div class="folio-shape">
         <div class="folio-face">
           <h3 class="folio-title">
@@ -2250,7 +2318,7 @@
         </div>
       </div>
     </article>
-    <article class="folio-panel" style="--accent:var(--c-mint); --rgb:57,227,166;">
+    <article class="folio-panel" style="--accent:#ffffff; --rgb:255,255,255;">
       <div class="folio-shape">
         <div class="folio-face">
           <h3 class="folio-title">
@@ -3493,6 +3561,35 @@ document.addEventListener("click", (e) => {
   const root = document.getElementById("folio");
   if (!root) return;
   const panels = Array.from(root.querySelectorAll(".folio-panel"));
+
+  // Entrance: folders rise in one after another the first time the section is seen
+  if (!prefersReducedMotion && "IntersectionObserver" in window){
+    root.classList.add("folio-anim");
+    panels.forEach((p, i) => p.style.setProperty("--i", i));
+    const io = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      requestAnimationFrame(() => panels.forEach(p => p.classList.add("folio-in")));
+      setTimeout(() => root.classList.remove("folio-anim"), 2400); // drop the helper classes afterwards
+    }, { threshold: 0.2 });
+    io.observe(root);
+  }
+
+  // Cursor spotlight: a soft white glow follows the pointer inside the hovered folder
+  if (!prefersReducedMotion){
+    let raf = 0;
+    root.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      const face = e.target.closest(".folio-face");
+      if (!face) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = face.getBoundingClientRect();
+        face.style.setProperty("--mx", (e.clientX - r.left) + "px");
+        face.style.setProperty("--my", (e.clientY - r.top) + "px");
+      });
+    }, { passive:true });
+  }
 
   const setOpen = (panel, open) => {
     panel.classList.toggle("is-open", open);
