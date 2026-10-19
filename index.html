@@ -144,7 +144,7 @@
   .orbit-card{
     position:absolute;
     top:0; left:0;
-    width:clamp(58px, 9.5vw, 104px);
+    width:clamp(58px, 10.5vw, 128px);
     aspect-ratio:1/1;
     transform: translate(-50%,-50%) rotate(var(--angle,0deg));
     cursor:pointer;
@@ -2054,6 +2054,23 @@
   .orbit-card.is-loading .orbit-card-inner{ animation:orbitPulse 1.4s ease-in-out infinite; }
   @keyframes orbitPulse{ 0%,100%{ background-color:#15151d; } 50%{ background-color:#242430; } }
   @media (prefers-reduced-motion:reduce){ .orbit-card.is-loading .orbit-card-inner{ animation:none; } }
+
+  /* ---------- hero ambience: soft glow + faint dot grid behind the ring ---------- */
+  .hero::before{
+    content:'';
+    position:absolute; inset:0;
+    z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse 50% 38% at 50% 70%, rgba(255,255,255,.075), transparent 70%),
+      radial-gradient(ellipse 60% 45% at 50% 100%, rgba(255,110,90,.10), transparent 70%),
+      radial-gradient(circle, rgba(255,255,255,.13) 1px, transparent 1.7px) 0 0 / 30px 30px;
+    -webkit-mask:radial-gradient(ellipse 85% 75% at 50% 62%, #000 25%, transparent 80%);
+            mask:radial-gradient(ellipse 85% 75% at 50% 62%, #000 25%, transparent 80%);
+    animation:heroBreath 8s ease-in-out infinite;
+  }
+  @keyframes heroBreath{ 0%,100%{ opacity:.65; } 50%{ opacity:1; } }
+  @media (prefers-reduced-motion:reduce){ .hero::before{ animation:none; } }
 </style>
 </head>
 <body>
@@ -2711,7 +2728,7 @@ const orbitImages = [
 
 
 const orbit = document.getElementById("orbit");
-const n = orbitImages.length;
+let n = orbitImages.length;
 
 /* Geometry knobs. The cards sit EVENLY around a full circle
    (360 / 12 = 30deg apart), whose center is below the composition —
@@ -2779,6 +2796,16 @@ function pumpOrbitQueue(){
     img.src = src;
   }
 }
+let orbitCleanupTimer = 0;
+function scheduleOrbitCleanup(){
+  clearTimeout(orbitCleanupTimer);
+  orbitCleanupTimer = setTimeout(() => {
+    if (orbitQueue.length || orbitActive > 0){ scheduleOrbitCleanup(); return; }   // still loading, check later
+    if (!orbitImages.some(it => it.loaded)) return;      // nothing loaded at all -> keep the ring as it is
+    const alive = orbitImages.filter(it => !it.failed).length;
+    if (alive !== cardEls.length) buildCards();
+  }, 1500);
+}
 function startOrbitQueue(){
   if (orbitStarted) return;
   orbitStarted = true;
@@ -2788,8 +2815,10 @@ function startOrbitQueue(){
 function buildCards(){
   orbit.innerHTML = "";
   cardEls.length = 0;
+  const list = orbitImages.filter(it => !it.failed);   // photos that could not load are dropped
+  n = Math.max(list.length, 1);
   const step = 360 / n; // equal angular spacing, all cards, full circle
-  orbitImages.forEach((item, i) => {
+  list.forEach((item, i) => {
     const card = document.createElement("div");
     card.className = "orbit-card";
     card.style.setProperty("--glow", item.glow);
@@ -2809,13 +2838,32 @@ function buildCards(){
     img.alt = "Portfolio image " + (i + 1);
     img.decoding = "async";
     img.fetchPriority = "low"; // let the logo download first
+    const imgSrc = item.thumb || item.src;           // small version on the ring, full one in the lightbox
     img.addEventListener("load", () => {
+      item.loaded = true;
       img.classList.add("is-loaded");
       card.classList.remove("is-loading");
       glow.style.backgroundImage = `url("${img.currentSrc || img.src}")`;
     });
+    img.addEventListener("error", () => {
+      if (!item.retried){                            // one retry (short links sometimes hiccup)
+        item.retried = true;
+        setTimeout(() => queueOrbitImage(img, imgSrc), 1200);
+        return;
+      }
+      item.failed = true;                            // still broken
+      card.classList.remove("is-loading");
+      card.classList.add("is-failed");               // static dark tile (no pulse)
+      scheduleOrbitCleanup();
+    });
     inner.appendChild(img);
-    queueOrbitImage(img, item.thumb || item.src);   // small version on the ring, full one in the lightbox
+    if (item.loaded){                                // ring rebuilt: photos already loaded show instantly
+      img.classList.add("is-loaded");
+      card.classList.remove("is-loading");
+      img.src = imgSrc;
+    } else {
+      queueOrbitImage(img, imgSrc);
+    }
     card.appendChild(inner);
     orbit.appendChild(card);
 
