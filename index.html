@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1951,17 +1951,51 @@
     .folio-item, .folio-panel.is-open .folio-item{ transition:none; filter:none; transform:none; }
     .folio-meter i, .folio-panel.is-open .folio-meter i{ transition:none; }
   }
+
+  /* ---------- LANGUAGE SWITCH (VI | EN) ---------- */
+  .hdr-right{display:flex; align-items:center; gap:16px; flex-shrink:0;}
+  .lang-switch{
+    display:inline-flex; align-items:center;
+    padding:2px;
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;
+    background:rgba(255,255,255,.05);
+  }
+  .lang-switch button{
+    font:600 11px/1 'Space Grotesk', sans-serif;
+    letter-spacing:.08em;
+    color:var(--muted);
+    background:none; border:0;
+    padding:6px 10px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:color .25s ease, background .25s ease;
+  }
+  .lang-switch button:hover{color:var(--text);}
+  .lang-switch button[aria-pressed="true"]{background:var(--text); color:var(--bg);}
+  .lang-switch button:focus-visible{outline:2px solid var(--c-cyan); outline-offset:1px;}
+  @media (max-width:600px){
+    .hdr-right .brand-mark{display:none;}
+    .hdr-right{gap:0;}
+    .lang-switch button{padding:5px 8px; font-size:10.5px;}
+  }
 </style>
 </head>
 <body>
 
 <header>
   <nav>
-    <a href="#about">About Me</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
+    <a href="#about" data-i18n="nav.about">About Me</a>
+    <a href="#projects" data-i18n="nav.projects">Projects</a>
+    <a href="#contact" data-i18n="nav.contact">Contact</a>
   </nav>
-  <span class="brand-mark">© 2026</span>
+  <div class="hdr-right">
+    <div class="lang-switch" role="group" aria-label="Ngôn ngữ / Language">
+      <button type="button" data-lang="vi" aria-pressed="true" title="Tiếng Việt">VI</button>
+      <button type="button" data-lang="en" aria-pressed="false" title="English">EN</button>
+    </div>
+    <span class="brand-mark">© 2026</span>
+  </div>
 </header>
 
 <!-- ============ HERO ============ -->
@@ -1988,21 +2022,21 @@
 <!-- ============ ABOUT ============ -->
 <section id="about" style="border-top:none;">
   <div class="section-head">
-    <h2>About Me</h2>
-    <span class="idx">01 — About</span>
+    <h2 data-i18n="about.h2">About Me</h2>
+    <span class="idx" data-i18n="about.idx">01 — About</span>
   </div>
   <div class="about-grid">
 
     <!-- Portrait (3:4). Paste your image link into PORTRAIT_SRC at the top of the script section (bottom of this file). -->
     <figure class="portrait">
-      <span class="portrait-ph">Your photo · 3:4</span>
-      <img id="portraitImg" alt="Portrait">
+      <span class="portrait-ph" data-i18n="about.photo">Your photo · 3:4</span>
+      <img id="portraitImg" alt="Portrait" data-i18n-alt="about.portrait">
       <span class="portrait-blur" aria-hidden="true"></span>
     </figure>
 
     <div class="about-info">
       <!-- EDIT: short intro about yourself -->
-      <p>
+      <p data-i18n-html="about.p">
         Hi, I'm a graphic designer based in Ho Chi Minh City. I design social content,
         logos, typography and packaging — clean structure first, then a touch of glow
         to make it memorable.
@@ -2012,15 +2046,15 @@
 
       <dl class="about-facts">
         <!-- EDIT: your name and year of birth -->
-        <div><dt>Name</dt><dd>Your Name</dd></div>
-        <div><dt>Born</dt><dd>YYYY</dd></div>
-        <div class="wide"><dt>Based in</dt><dd>Ho Chi Minh City (TP.HCM)</dd></div>
+        <div><dt data-i18n="about.name">Name</dt><dd>Your Name</dd></div>
+        <div><dt data-i18n="about.born">Born</dt><dd>YYYY</dd></div>
+        <div class="wide"><dt data-i18n="about.based">Based in</dt><dd data-i18n="about.city">Ho Chi Minh City (TP.HCM)</dd></div>
         <div class="wide">
-          <dt>Education</dt>
+          <dt data-i18n="about.edu">Education</dt>
           <dd>
             <div class="edu-item">
-              Dong Nai College of Decorative Arts
-              <small>Graphic Design</small>
+              <span data-i18n="about.school">Dong Nai College of Decorative Arts</span>
+              <small data-i18n="about.major">Graphic Design</small>
             </div>
             <!-- add another school:
             <div class="edu-item">School name<small>Major</small></div> -->
@@ -2030,7 +2064,7 @@
 
       <!-- Worked With: paste your partner/client logo links into the img src="" below -->
       <div class="about-logos">
-        <span class="logos-label">Worked With</span>
+        <span class="logos-label" data-i18n="about.worked">Worked With</span>
         <div class="logos-row">
           <span class="logo-item" data-name="NAWON F&B CO., LTD." tabindex="0">
             <img src="logo01.png" alt="NAWON F&B CO., LTD." loading="lazy">
@@ -2048,7 +2082,7 @@
            These 4 logo files (logo-01.png ... logo-04.png) sit in the SAME folder as this
            HTML file — same pattern as the "Worked With" logos above. -->
       <div class="about-logos">
-        <span class="logos-label">Software</span>
+        <span class="logos-label" data-i18n="about.software">Software</span>
         <div class="logos-row">
           <span class="logo-item" data-name="Adobe CC" tabindex="0">
             <img src="logo-01.png" alt="Adobe CC" loading="lazy">
@@ -2068,13 +2102,13 @@
         </div>
         <!-- Skill tags shown under the Software logos -->
         <ul class="career-points" style="margin-top:20px;">
-          <li>Graphic Design</li>
-          <li>Video Editor</li>
-          <li>3D Modeling</li>
-          <li>Hand-drawn</li>
+          <li data-i18n="tag.graphic">Graphic Design</li>
+          <li data-i18n="tag.video">Video Editor</li>
+          <li data-i18n="tag.3d">3D Modeling</li>
+          <li data-i18n="tag.hand">Hand-drawn</li>
           <li>AI &amp; Generative</li>
-          <li>Project Management</li>
-          <li>Songwriting</li>
+          <li data-i18n="tag.pm">Project Management</li>
+          <li data-i18n="tag.song">Songwriting</li>
         </ul>
       </div>
 
@@ -2088,17 +2122,17 @@
      Tool meters: change --lvl (100% = every day, 66% = often). Strip height / overlap: --H, --O in the CSS. -->
 <section id="career" class="folio-sec">
   <div class="section-head">
-    <h2>Career</h2>
-    <span class="idx">02 — Career</span>
+    <h2 data-i18n="career.h2">Career</h2>
+    <span class="idx" data-i18n="career.idx">02 — Career</span>
   </div>
-  <p class="folio-hint">Select a folder to open it.</p>
+  <p class="folio-hint" data-i18n="career.hint">Select a folder to open it.</p>
   <div class="folio" id="folio">
     <article class="folio-panel" style="--accent:var(--c-violet); --rgb:138,107,255;">
       <div class="folio-shape">
         <div class="folio-face">
           <h3 class="folio-title">
             <button class="folio-head" type="button" id="folio-btn-01" aria-expanded="false" aria-controls="folio-body-01">
-              <span class="folio-no">01</span><span class="folio-name">Kinh nghiệm làm việc</span><span class="folio-plus" aria-hidden="true"></span>
+              <span class="folio-no">01</span><span class="folio-name" data-i18n="f1.name">Kinh nghiệm làm việc</span><span class="folio-plus" aria-hidden="true"></span>
             </button>
           </h3>
           <div class="folio-collapse" id="folio-body-01" role="region" aria-labelledby="folio-btn-01">
@@ -2106,36 +2140,36 @@
               <div class="folio-entry folio-item" style="--k:0">
                 <div>
                   <h4>Nawon F&amp;B</h4>
-                  <p class="folio-role">Packaging Designer</p>
+                  <p class="folio-role" data-i18n="role.pack">Packaging Designer</p>
                   <p class="folio-date">09/2023 – 03/2024</p>
                 </div>
                 <ul class="folio-points">
-                  <li>Phát triển thiết kế bao bì sản phẩm, triển khai artwork và chuẩn bị file in ấn.</li>
-                  <li>Xây dựng mockup sản phẩm, kiểm tra tính nhất quán của thiết kế và đáp ứng yêu cầu sản xuất.</li>
+                  <li data-i18n="b.n1">Phát triển thiết kế bao bì sản phẩm, triển khai artwork và chuẩn bị file in ấn.</li>
+                  <li data-i18n="b.n2">Xây dựng mockup sản phẩm, kiểm tra tính nhất quán của thiết kế và đáp ứng yêu cầu sản xuất.</li>
                 </ul>
               </div>
               <div class="folio-entry folio-item" style="--k:1">
                 <div>
                   <h4>Nawon F&amp;B</h4>
-                  <p class="folio-role">Marketing Designer</p>
-                  <p class="folio-date">03/2024 – Hiện tại</p>
+                  <p class="folio-role" data-i18n="role.mkt">Marketing Designer</p>
+                  <p class="folio-date" data-i18n="date.now">03/2024 – Hiện tại</p>
                 </div>
                 <ul class="folio-points">
-                  <li>Thiết kế ấn phẩm marketing cho mạng xã hội, website và các nền tảng thương mại điện tử.</li>
-                  <li>Phát triển catalogue, hồ sơ năng lực công ty và tài liệu hướng dẫn nhận diện thương hiệu.</li>
-                  <li>Sản xuất hình ảnh sản phẩm 3D, thiết kế đồ họa gian hàng triển lãm và video quảng bá.</li>
-                  <li>Triển khai thiết kế từ khâu phát triển ý tưởng đến hoàn thiện file phục vụ truyền thông và sản xuất.</li>
+                  <li data-i18n="b.m1">Thiết kế ấn phẩm marketing cho mạng xã hội, website và các nền tảng thương mại điện tử.</li>
+                  <li data-i18n="b.m2">Phát triển catalogue, hồ sơ năng lực công ty và tài liệu hướng dẫn nhận diện thương hiệu.</li>
+                  <li data-i18n="b.m3">Sản xuất hình ảnh sản phẩm 3D, thiết kế đồ họa gian hàng triển lãm và video quảng bá.</li>
+                  <li data-i18n="b.m4">Triển khai thiết kế từ khâu phát triển ý tưởng đến hoàn thiện file phục vụ truyền thông và sản xuất.</li>
                 </ul>
               </div>
               <div class="folio-entry folio-item" style="--k:2">
                 <div>
-                  <h4>Freelance Graphic Designer</h4>
-                  <p class="folio-date">Song song với công việc chính</p>
+                  <h4 data-i18n="role.free">Freelance Graphic Designer</h4>
+                  <p class="folio-date" data-i18n="date.free">Song song với công việc chính</p>
                 </div>
                 <ul class="folio-points">
-                  <li>Hợp tác với nhiều khách hàng trong các dự án thiết kế thương mại và truyền thông.</li>
-                  <li>Thực hiện poster quảng cáo, ấn phẩm marketing, motion graphics và hậu kỳ hình ảnh.</li>
-                  <li>Linh hoạt triển khai thiết kế theo yêu cầu, mục tiêu và định hướng hình ảnh của từng dự án.</li>
+                  <li data-i18n="b.f1">Hợp tác với nhiều khách hàng trong các dự án thiết kế thương mại và truyền thông.</li>
+                  <li data-i18n="b.f2">Thực hiện poster quảng cáo, ấn phẩm marketing, motion graphics và hậu kỳ hình ảnh.</li>
+                  <li data-i18n="b.f3">Linh hoạt triển khai thiết kế theo yêu cầu, mục tiêu và định hướng hình ảnh của từng dự án.</li>
                 </ul>
               </div>
             </div>
@@ -2148,27 +2182,27 @@
         <div class="folio-face">
           <h3 class="folio-title">
             <button class="folio-head" type="button" id="folio-btn-02" aria-expanded="false" aria-controls="folio-body-02">
-              <span class="folio-no">02</span><span class="folio-name">Năng lực chuyên môn</span><span class="folio-plus" aria-hidden="true"></span>
+              <span class="folio-no">02</span><span class="folio-name" data-i18n="f2.name">Năng lực chuyên môn</span><span class="folio-plus" aria-hidden="true"></span>
             </button>
           </h3>
           <div class="folio-collapse" id="folio-body-02" role="region" aria-labelledby="folio-btn-02">
             <div class="folio-body">
               <div class="folio-skills">
                 <div class="folio-skill folio-item" style="--k:0">
-                  <h4>Thiết kế Marketing</h4>
-                  <p>Hình ảnh chiến dịch, quảng cáo kỹ thuật số, mạng xã hội và thương mại điện tử.</p>
+                  <h4 data-i18n="sk1.t">Thiết kế Marketing</h4>
+                  <p data-i18n="sk1.d">Hình ảnh chiến dịch, quảng cáo kỹ thuật số, mạng xã hội và thương mại điện tử.</p>
                 </div>
                 <div class="folio-skill folio-item" style="--k:1">
-                  <h4>Thiết kế Bao bì &amp; In ấn</h4>
-                  <p>Artwork bao bì, mockup sản phẩm và chuẩn bị file sản xuất.</p>
+                  <h4 data-i18n="sk2.t">Thiết kế Bao bì &amp; In ấn</h4>
+                  <p data-i18n="sk2.d">Artwork bao bì, mockup sản phẩm và chuẩn bị file sản xuất.</p>
                 </div>
                 <div class="folio-skill folio-item" style="--k:2">
-                  <h4>Nhận diện Thương hiệu</h4>
-                  <p>Hệ thống nhận diện, brand guideline, typography và bố cục.</p>
+                  <h4 data-i18n="sk3.t">Nhận diện Thương hiệu</h4>
+                  <p data-i18n="sk3.d">Hệ thống nhận diện, brand guideline, typography và bố cục.</p>
                 </div>
                 <div class="folio-skill folio-item" style="--k:3">
                   <h4>3D &amp; Motion</h4>
-                  <p>Dựng hình, trực quan hóa sản phẩm, rendering và chỉnh sửa video.</p>
+                  <p data-i18n="sk4.d">Dựng hình, trực quan hóa sản phẩm, rendering và chỉnh sửa video.</p>
                 </div>
               </div>
             </div>
@@ -2181,7 +2215,7 @@
         <div class="folio-face">
           <h3 class="folio-title">
             <button class="folio-head" type="button" id="folio-btn-03" aria-expanded="false" aria-controls="folio-body-03">
-              <span class="folio-no">03</span><span class="folio-name">Tần suất sử dụng công cụ</span><span class="folio-plus" aria-hidden="true"></span>
+              <span class="folio-no">03</span><span class="folio-name" data-i18n="f3.name">Tần suất sử dụng công cụ</span><span class="folio-plus" aria-hidden="true"></span>
             </button>
           </h3>
           <div class="folio-collapse" id="folio-body-03" role="region" aria-labelledby="folio-btn-03">
@@ -2189,27 +2223,27 @@
               <div class="folio-tool folio-item" style="--k:0">
                 <b>Adobe Photoshop</b>
                 <div class="folio-meter" aria-hidden="true"><i style="--lvl:100%"></i></div>
-                <span>Hằng ngày</span>
+                <span data-i18n="freq.daily">Hằng ngày</span>
               </div>
               <div class="folio-tool folio-item" style="--k:1">
                 <b>Adobe Illustrator</b>
                 <div class="folio-meter" aria-hidden="true"><i style="--lvl:100%"></i></div>
-                <span>Hằng ngày</span>
+                <span data-i18n="freq.daily">Hằng ngày</span>
               </div>
               <div class="folio-tool folio-item" style="--k:2">
                 <b>Blender 3D</b>
                 <div class="folio-meter" aria-hidden="true"><i style="--lvl:100%"></i></div>
-                <span>Hằng ngày</span>
+                <span data-i18n="freq.daily">Hằng ngày</span>
               </div>
               <div class="folio-tool folio-item" style="--k:3">
                 <b>Adobe Premiere Pro</b>
                 <div class="folio-meter" aria-hidden="true"><i style="--lvl:66%"></i></div>
-                <span>Thường xuyên</span>
+                <span data-i18n="freq.often">Thường xuyên</span>
               </div>
               <div class="folio-tool folio-item" style="--k:4">
                 <b>Adobe After Effects</b>
                 <div class="folio-meter" aria-hidden="true"><i style="--lvl:66%"></i></div>
-                <span>Thường xuyên</span>
+                <span data-i18n="freq.often">Thường xuyên</span>
               </div>
             </div>
           </div>
@@ -2221,14 +2255,14 @@
         <div class="folio-face">
           <h3 class="folio-title">
             <button class="folio-head" type="button" id="folio-btn-04" aria-expanded="false" aria-controls="folio-body-04">
-              <span class="folio-no">04</span><span class="folio-name">Định hướng làm việc</span><span class="folio-plus" aria-hidden="true"></span>
+              <span class="folio-no">04</span><span class="folio-name" data-i18n="f4.name">Định hướng làm việc</span><span class="folio-plus" aria-hidden="true"></span>
             </button>
           </h3>
           <div class="folio-collapse" id="folio-body-04" role="region" aria-labelledby="folio-btn-04">
             <div class="folio-body">
               <div class="folio-statement">
-                <p class="folio-item" style="--k:0">Liên tục phát triển kiến thức và kỹ năng trong các lĩnh vực thiết kế thương hiệu, marketing, bao bì và 3D. Hướng đến khả năng thích ứng linh hoạt, tư duy sáng tạo và triển khai các giải pháp thiết kế hiệu quả, đáp ứng mục tiêu truyền thông, yêu cầu thương mại và tiêu chuẩn sản xuất.</p>
-                <a class="folio-cta folio-item" style="--k:1" href="#projects" data-goto-cat="">Xem các dự án</a>
+                <p class="folio-item" style="--k:0" data-i18n="career.dir">Liên tục phát triển kiến thức và kỹ năng trong các lĩnh vực thiết kế thương hiệu, marketing, bao bì và 3D. Hướng đến khả năng thích ứng linh hoạt, tư duy sáng tạo và triển khai các giải pháp thiết kế hiệu quả, đáp ứng mục tiêu truyền thông, yêu cầu thương mại và tiêu chuẩn sản xuất.</p>
+                <a class="folio-cta folio-item" style="--k:1" href="#projects" data-goto-cat="" data-i18n="career.cta">Xem các dự án</a>
               </div>
             </div>
           </div>
@@ -2241,8 +2275,8 @@
 <!-- ============ PROJECTS ============ -->
 <section id="projects">
   <div class="section-head">
-    <h2>My Projects</h2>
-    <span class="idx">03 — Projects</span>
+    <h2 data-i18n="proj.h2">My Projects</h2>
+    <span class="idx" data-i18n="proj.idx">03 — Projects</span>
   </div>
   <div class="project-filters" id="projectFilters"></div>
   <div class="project-grid" id="projectGrid"></div>
@@ -2262,7 +2296,7 @@
 <div class="case" id="case" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="caseTitle">
   <div class="case-bar">
     <div class="case-bar-info"><b id="caseTitle"></b><span id="caseMeta"></span></div>
-    <button class="case-close" id="caseClose" type="button" aria-label="Close">✕</button>
+    <button class="case-close" id="caseClose" type="button" aria-label="Close" data-i18n-aria="aria.close">✕</button>
     <i class="case-progress" id="caseProgress"></i>
   </div>
   <div class="case-inner">
@@ -2272,37 +2306,214 @@
       <p id="caseDesc"></p>
     </div>
     <div class="case-pages" id="casePages"></div>
-    <div class="case-end"><button type="button" id="caseBack">← Quay lại dự án</button></div>
+    <div class="case-end"><button type="button" id="caseBack" data-i18n="case.back">← Quay lại dự án</button></div>
   </div>
 </div>
 
 <!-- ============ LIGHTBOX (full-screen image view) ============ -->
 <div class="lightbox" id="lightbox" aria-hidden="true">
-  <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close" data-i18n-aria="aria.close">✕</button>
   <img id="lightboxImg" src="" alt="">
 </div>
 
 <!-- ============ CONTACT MODAL (glass / blur, opens on any "Contact" click) ============ -->
 <div class="contact-overlay" id="contactOverlay" aria-hidden="true">
   <div class="contact-card" role="dialog" aria-modal="true" aria-labelledby="contactCardName">
-    <button class="contact-card-close" id="contactCardClose" aria-label="Close">✕</button>
+    <button class="contact-card-close" id="contactCardClose" aria-label="Close" data-i18n-aria="aria.close">✕</button>
     <div class="contact-card-top">
       <div class="contact-card-eyebrow">
-        <b>Contact</b>
-        <span>Thông tin liên hệ</span>
+        <b data-i18n="ct.h">Contact</b>
+        <span data-i18n="ct.sub">Thông tin liên hệ</span>
       </div>
     </div>
     <h3 id="contactCardName" class="contact-card-name">Nguyễn Anh Vũ</h3>
     <ul class="contact-card-info">
-      <li><span class="ci-label">YOB</span><span class="ci-value">2002</span></li>
-      <li><span class="ci-label">LOC.</span><span class="ci-value">TP. HCM</span></li>
-      <li><span class="ci-label">Tel.</span><span class="ci-value"><a href="tel:0866715641">0866 715 641</a></span></li>
-      <li><span class="ci-label">E-mail</span><span class="ci-value"><a href="mailto:nguyenanhvucvv@gmail.com">nguyenanhvucvv@gmail.com</a></span></li>
+      <li><span class="ci-label" data-i18n="ct.yob">YOB</span><span class="ci-value">2002</span></li>
+      <li><span class="ci-label" data-i18n="ct.loc">LOC.</span><span class="ci-value">TP. HCM</span></li>
+      <li><span class="ci-label" data-i18n="ct.tel">Tel.</span><span class="ci-value"><a href="tel:0866715641">0866 715 641</a></span></li>
+      <li><span class="ci-label" data-i18n="ct.mail">E-mail</span><span class="ci-value"><a href="mailto:nguyenanhvucvv@gmail.com">nguyenanhvucvv@gmail.com</a></span></li>
     </ul>
   </div>
 </div>
 
 <script>
+/* =========================================================
+   LANGUAGE (VI default / EN) — dictionary + helpers.
+   Static text uses data-i18n / data-i18n-html / data-i18n-alt / data-i18n-aria.
+   Branding projects can add optional English fields: title_en, meta_en, desc_en.
+   ========================================================= */
+const I18N = {
+ "vi": {
+  "nav.about": "Về tôi",
+  "nav.projects": "Dự án",
+  "nav.contact": "Liên hệ",
+  "about.h2": "Về tôi",
+  "about.idx": "01 — Về tôi",
+  "about.photo": "Ảnh của bạn · 3:4",
+  "about.portrait": "Chân dung",
+  "about.p": "Xin chào, mình là nhà thiết kế đồ họa đang sống tại TP. Hồ Chí Minh. Mình thiết kế nội dung mạng xã hội, logo, typography và bao bì — ưu tiên cấu trúc gọn gàng, sau đó thêm một chút “glow” để thiết kế trở nên đáng nhớ.<br><br>Mình thích biến những ý tưởng đơn giản thành hình ảnh khiến người xem nhớ lâu.",
+  "about.name": "Tên",
+  "about.born": "Năm sinh",
+  "about.based": "Nơi ở",
+  "about.city": "TP. Hồ Chí Minh",
+  "about.edu": "Học vấn",
+  "about.school": "Cao đẳng Mỹ thuật Trang trí Đồng Nai",
+  "about.major": "Thiết kế đồ họa",
+  "about.worked": "Đã hợp tác",
+  "about.software": "Phần mềm",
+  "tag.graphic": "Thiết kế đồ họa",
+  "tag.video": "Dựng video",
+  "tag.3d": "Dựng mô hình 3D",
+  "tag.hand": "Vẽ tay",
+  "tag.pm": "Quản lý dự án",
+  "tag.song": "Sáng tác nhạc",
+  "career.h2": "Sự nghiệp",
+  "career.idx": "02 — Sự nghiệp",
+  "career.hint": "Chọn một thư mục để mở.",
+  "f1.name": "Kinh nghiệm làm việc",
+  "f2.name": "Năng lực chuyên môn",
+  "f3.name": "Tần suất sử dụng công cụ",
+  "f4.name": "Định hướng làm việc",
+  "role.pack": "Thiết kế bao bì",
+  "role.mkt": "Thiết kế Marketing",
+  "role.free": "Freelance Graphic Designer",
+  "date.now": "03/2024 – Hiện tại",
+  "date.free": "Song song với công việc chính",
+  "b.n1": "Phát triển thiết kế bao bì sản phẩm, triển khai artwork và chuẩn bị file in ấn.",
+  "b.n2": "Xây dựng mockup sản phẩm, kiểm tra tính nhất quán của thiết kế và đáp ứng yêu cầu sản xuất.",
+  "b.m1": "Thiết kế ấn phẩm marketing cho mạng xã hội, website và các nền tảng thương mại điện tử.",
+  "b.m2": "Phát triển catalogue, hồ sơ năng lực công ty và tài liệu hướng dẫn nhận diện thương hiệu.",
+  "b.m3": "Sản xuất hình ảnh sản phẩm 3D, thiết kế đồ họa gian hàng triển lãm và video quảng bá.",
+  "b.m4": "Triển khai thiết kế từ khâu phát triển ý tưởng đến hoàn thiện file phục vụ truyền thông và sản xuất.",
+  "b.f1": "Hợp tác với nhiều khách hàng trong các dự án thiết kế thương mại và truyền thông.",
+  "b.f2": "Thực hiện poster quảng cáo, ấn phẩm marketing, motion graphics và hậu kỳ hình ảnh.",
+  "b.f3": "Linh hoạt triển khai thiết kế theo yêu cầu, mục tiêu và định hướng hình ảnh của từng dự án.",
+  "sk1.t": "Thiết kế Marketing",
+  "sk1.d": "Hình ảnh chiến dịch, quảng cáo kỹ thuật số, mạng xã hội và thương mại điện tử.",
+  "sk2.t": "Thiết kế Bao bì & In ấn",
+  "sk2.d": "Artwork bao bì, mockup sản phẩm và chuẩn bị file sản xuất.",
+  "sk3.t": "Nhận diện Thương hiệu",
+  "sk3.d": "Hệ thống nhận diện, brand guideline, typography và bố cục.",
+  "sk4.d": "Dựng hình, trực quan hóa sản phẩm, rendering và chỉnh sửa video.",
+  "freq.daily": "Hằng ngày",
+  "freq.often": "Thường xuyên",
+  "career.dir": "Liên tục phát triển kiến thức và kỹ năng trong các lĩnh vực thiết kế thương hiệu, marketing, bao bì và 3D. Hướng đến khả năng thích ứng linh hoạt, tư duy sáng tạo và triển khai các giải pháp thiết kế hiệu quả, đáp ứng mục tiêu truyền thông, yêu cầu thương mại và tiêu chuẩn sản xuất.",
+  "career.cta": "Xem các dự án",
+  "proj.h2": "Dự án của tôi",
+  "proj.idx": "03 — Dự án",
+  "cat.branding": "Branding",
+  "cat.social": "Social Post",
+  "cat.logo": "Logo",
+  "cat.typo": "Typography",
+  "cat.packaging": "Bao bì",
+  "cat.art": "Tác phẩm cá nhân",
+  "proj.view": "Xem dự án",
+  "proj.pages": "trang",
+  "proj.empty": "Sắp có tác phẩm mới.",
+  "proj.photos": "ảnh",
+  "proj.moreAria": "Xem thêm {n} ảnh",
+  "proj.less": "Thu gọn",
+  "proj.lessAria": "Ẩn bớt ảnh",
+  "case.back": "← Quay lại dự án",
+  "aria.close": "Đóng",
+  "ct.h": "Liên hệ",
+  "ct.sub": "Kết nối với mình",
+  "ct.yob": "Năm sinh",
+  "ct.loc": "Nơi ở",
+  "ct.tel": "Điện thoại",
+  "ct.mail": "E-mail"
+ },
+ "en": {
+  "nav.about": "About Me",
+  "nav.projects": "Projects",
+  "nav.contact": "Contact",
+  "about.h2": "About Me",
+  "about.idx": "01 — About",
+  "about.photo": "Your photo · 3:4",
+  "about.portrait": "Portrait",
+  "about.p": "Hi, I'm a graphic designer based in Ho Chi Minh City. I design social content, logos, typography and packaging — clean structure first, then a touch of glow to make it memorable.<br><br>I love turning simple ideas into visuals people actually remember.",
+  "about.name": "Name",
+  "about.born": "Born",
+  "about.based": "Based in",
+  "about.city": "Ho Chi Minh City (TP.HCM)",
+  "about.edu": "Education",
+  "about.school": "Dong Nai College of Decorative Arts",
+  "about.major": "Graphic Design",
+  "about.worked": "Worked With",
+  "about.software": "Software",
+  "tag.graphic": "Graphic Design",
+  "tag.video": "Video Editor",
+  "tag.3d": "3D Modeling",
+  "tag.hand": "Hand-drawn",
+  "tag.pm": "Project Management",
+  "tag.song": "Songwriting",
+  "career.h2": "Career",
+  "career.idx": "02 — Career",
+  "career.hint": "Select a folder to open it.",
+  "f1.name": "Work Experience",
+  "f2.name": "Core Skills",
+  "f3.name": "Tool Usage Frequency",
+  "f4.name": "Career Direction",
+  "role.pack": "Packaging Designer",
+  "role.mkt": "Marketing Designer",
+  "role.free": "Freelance Graphic Designer",
+  "date.now": "03/2024 – Present",
+  "date.free": "Alongside my main job",
+  "b.n1": "Developed product packaging designs, produced artwork and prepared print-ready files.",
+  "b.n2": "Built product mockups and checked design consistency and production requirements.",
+  "b.m1": "Designed marketing materials for social media, websites and e-commerce platforms.",
+  "b.m2": "Developed catalogues, company profiles and brand identity guideline documents.",
+  "b.m3": "Produced 3D product visuals, designed exhibition booth graphics and made promotional videos.",
+  "b.m4": "Carried designs from initial concept through to final files for communications and production.",
+  "b.f1": "Worked with a range of clients on commercial design and communications projects.",
+  "b.f2": "Created advertising posters, marketing materials, motion graphics and image post-production.",
+  "b.f3": "Adapted designs flexibly to each project's brief, goals and visual direction.",
+  "sk1.t": "Marketing Design",
+  "sk1.d": "Campaign visuals, digital ads, social media and e-commerce.",
+  "sk2.t": "Packaging & Print Design",
+  "sk2.d": "Packaging artwork, product mockups and production file preparation.",
+  "sk3.t": "Brand Identity",
+  "sk3.d": "Identity systems, brand guidelines, typography and layout.",
+  "sk4.d": "Modeling, product visualization, rendering and video editing.",
+  "freq.daily": "Daily",
+  "freq.often": "Often",
+  "career.dir": "Continuously developing knowledge and skills in brand design, marketing, packaging and 3D. Aiming for flexible adaptability, creative thinking and effective design solutions that meet communication goals, commercial requirements and production standards.",
+  "career.cta": "View projects",
+  "proj.h2": "My Projects",
+  "proj.idx": "03 — Projects",
+  "cat.branding": "Branding",
+  "cat.social": "Social Post",
+  "cat.logo": "Logo",
+  "cat.typo": "Typography",
+  "cat.packaging": "Packaging",
+  "cat.art": "My Art Work",
+  "proj.view": "View project",
+  "proj.pages": "pages",
+  "proj.empty": "New work coming soon.",
+  "proj.photos": "photos",
+  "proj.moreAria": "Show {n} more photos",
+  "proj.less": "Show less",
+  "proj.lessAria": "Show fewer photos",
+  "case.back": "← Back to projects",
+  "aria.close": "Close",
+  "ct.h": "Contact",
+  "ct.sub": "Get in touch",
+  "ct.yob": "YOB",
+  "ct.loc": "LOC.",
+  "ct.tel": "Tel.",
+  "ct.mail": "E-mail"
+ }
+};
+let LANG = "vi";
+try { const saved = localStorage.getItem("lang"); if (saved === "vi" || saved === "en") LANG = saved; } catch(e){}
+function t(key, vars){
+  let str = (I18N[LANG] && I18N[LANG][key]) || I18N.vi[key] || key;
+  if (vars) for (const k in vars) str = str.replace("{" + k + "}", vars[k]);
+  return str;
+}
+function catLabel(key){ return t("cat." + key); }
+function L(obj, field){ return (LANG === "en" && obj[field + "_en"]) || obj[field] || ""; }
+
 /* Hero logo: (1) wait until the first logo is fully downloaded + decoded,
    then play the reveal; (2) afterwards rotate the 3 logos forever with a
    left -> right blur wipe. */
@@ -2834,7 +3045,7 @@ function buildFilters(){
     btn.type = "button";
     btn.className = "filter-btn";
     btn.dataset.key = cat.key;
-    btn.textContent = cat.label;
+    btn.textContent = catLabel(cat.key);
     btn.addEventListener("click", () => {
       if (activeCategory === cat.key) return;
       switchCategory(cat.key);
@@ -2907,7 +3118,7 @@ function buildProjectGrid(opts = {}){
 
     const img = document.createElement("img");
     img.src = p.src;
-    img.alt = p.tag || ("Project " + (i + 1));
+    img.alt = catLabel(p.category) || ("Project " + (i + 1));
     img.loading = "lazy";
     card.appendChild(img);
 
@@ -2916,16 +3127,17 @@ function buildProjectGrid(opts = {}){
       const b = p.brand;
       const total = (b.pages || []).filter(Boolean).length || 1;
       card.classList.add("brand-card");
-      img.alt = b.title || "Branding";
+      img.alt = L(b, "title") || "Branding";
       const info = document.createElement("div");
       info.className = "brand-info";
-      info.innerHTML = '<div><h4></h4><small></small></div><span class="brand-open">Xem dự án →</span>';
-      info.querySelector("h4").textContent = b.title || "";
-      info.querySelector("small").textContent = [b.meta, total + " trang"].filter(Boolean).join(" · ");
+      info.innerHTML = '<div><h4></h4><small></small></div><span class="brand-open"></span>';
+      info.querySelector(".brand-open").textContent = t("proj.view") + " →";
+      info.querySelector("h4").textContent = L(b, "title");
+      info.querySelector("small").textContent = [L(b, "meta"), total + " " + t("proj.pages")].filter(Boolean).join(" · ");
       card.appendChild(info);
       card.setAttribute("role", "button");
       card.setAttribute("tabindex", "0");
-      card.setAttribute("aria-label", "Xem dự án " + (b.title || "Branding"));
+      card.setAttribute("aria-label", t("proj.view") + " " + (L(b, "title") || "Branding"));
       const open = () => openBrandingCase(b);
       card.addEventListener("click", open);
       card.addEventListener("keydown", (e) => {
@@ -2936,11 +3148,11 @@ function buildProjectGrid(opts = {}){
       const remaining = filtered.length - INITIAL_VISIBLE + 1;
       const overlay = document.createElement("div");
       overlay.className = "more-icon";
-      overlay.innerHTML = `<span class="dots">•••</span><span class="more-count">+${remaining} photos</span>`;
+      overlay.innerHTML = `<span class="dots">•••</span><span class="more-count">+${remaining} ${t("proj.photos")}</span>`;
       card.appendChild(overlay);
       card.setAttribute("role", "button");
       card.setAttribute("tabindex", "0");
-      card.setAttribute("aria-label", `Show ${remaining} more photos`);
+      card.setAttribute("aria-label", t("proj.moreAria", { n: remaining }));
       const expand = () => {
         projectsExpanded = true;
         rebuildGrid({ revealFrom: INITIAL_VISIBLE - 1, mode: "sequence" });
@@ -2950,10 +3162,10 @@ function buildProjectGrid(opts = {}){
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); expand(); }
       });
     } else {
-      if (p.tag){
+      if (p.category){
         const tag = document.createElement("span");
         tag.className = "tag";
-        tag.textContent = p.tag;
+        tag.textContent = catLabel(p.category);
         card.appendChild(tag);
       }
       card.addEventListener("click", () => openLightbox(p.src, img.alt));
@@ -2969,7 +3181,7 @@ function buildProjectGrid(opts = {}){
   if (filtered.length === 0){
     const empty = document.createElement("div");
     empty.className = "project-empty";
-    empty.textContent = "New work coming soon.";
+    empty.textContent = t("proj.empty");
     grid.appendChild(empty);
   }
 
@@ -2978,8 +3190,8 @@ function buildProjectGrid(opts = {}){
     const collapseBtn = document.createElement("button");
     collapseBtn.type = "button";
     collapseBtn.className = "collapse-btn";
-    collapseBtn.innerHTML = `<span class="chevron">⌃</span> Show less`;
-    collapseBtn.setAttribute("aria-label", "Show fewer photos");
+    collapseBtn.innerHTML = `<span class="chevron">⌃</span> ${t("proj.less")}`;
+    collapseBtn.setAttribute("aria-label", t("proj.lessAria"));
     collapseBtn.addEventListener("click", () => {
       projectsExpanded = false;
       rebuildGrid({ revealFrom: Infinity });
@@ -3046,10 +3258,10 @@ buildProjectGrid(); // first paint: no animation
     const pages = (b.pages || []).filter(Boolean);
     const list = pages.length ? pages : [b.cover];
 
-    titleEl.textContent = b.title || "";
-    metaEl.textContent  = b.meta || "";
-    headEl.textContent  = b.title || "";
-    descEl.textContent  = b.desc || "";
+    titleEl.textContent = L(b, "title");
+    metaEl.textContent  = L(b, "meta");
+    headEl.textContent  = L(b, "title");
+    descEl.textContent  = L(b, "desc");
     pagesEl.innerHTML = "";
 
     list.forEach((src, i) => {
@@ -3057,7 +3269,7 @@ buildProjectGrid(); // first paint: no animation
       wrap.className = "case-page";
       const im = document.createElement("img");
       im.src = src.trim();
-      im.alt = (b.title || "Branding") + " — " + (i + 1) + "/" + list.length;
+      im.alt = (L(b, "title") || "Branding") + " — " + (i + 1) + "/" + list.length;
       im.loading = i < 2 ? "eager" : "lazy";
       markLoaded(im);
       wrap.appendChild(im);
@@ -3311,6 +3523,35 @@ document.addEventListener("click", (e) => {
       panel.querySelector(".folio-head").focus();
     }
   });
+})();
+
+/* =========================================================
+   LANGUAGE SWITCH — applies the dictionary to the page
+   ========================================================= */
+(function initLang(){
+  const btns = document.querySelectorAll(".lang-switch [data-lang]");
+
+  function applyLang(rebuild){
+    document.documentElement.lang = LANG;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll("[data-i18n-alt]").forEach(el => { el.alt = t(el.dataset.i18nAlt); });
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+    btns.forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === LANG ? "true" : "false"));
+    if (rebuild){            // category tabs + project grid are built by JS, so rebuild them (no animation)
+      buildFilters();
+      buildProjectGrid();
+    }
+  }
+
+  btns.forEach(b => b.addEventListener("click", () => {
+    if (b.dataset.lang === LANG) return;
+    LANG = b.dataset.lang;
+    try { localStorage.setItem("lang", LANG); } catch(e){}
+    applyLang(true);
+  }));
+
+  applyLang(true);
 })();
 </script>
 
