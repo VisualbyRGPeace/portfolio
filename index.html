@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welcome To My Show</title>
-<link rel="preload" as="image" href="Logo-port.png" fetchpriority="high">
+<link rel="preload" as="fetch" href="models/portfolio.glb" crossorigin fetchpriority="high">
 <noscript><style>.hero-content h1 .logo-stage{opacity:1!important;filter:none!important;transform:none!important;animation:none!important}</style></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2076,6 +2076,32 @@
   @keyframes heroBreath{ 0%,100%{ opacity:.65; } 50%{ opacity:1; } }
   @media (prefers-reduced-motion:reduce){ .hero::before{ animation:none; } }
 </style>
+<style>
+/* ---------- HERO LOGO 3D (thay cho logo PNG) ---------- */
+.hero-content h1 .hero-3d{
+  display:block; position:relative; margin:0 auto;
+  width:clamp(260px, 62vw, 640px);   /* kích thước logo: chỉnh ở đây */
+  aspect-ratio:2.4 / 1;
+  pointer-events:auto; touch-action:pan-y; cursor:grab;
+  animation:logoFloat 7s ease-in-out infinite;
+}
+.hero-content h1 .hero-3d:active{ cursor:grabbing; }
+.hero-3d canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; }
+.hero-3d.is-ready canvas{ animation:h3dReveal 2.2s cubic-bezier(.22,.75,.3,1) forwards; }
+.hero-3d .hero-3d-fallback{
+  position:absolute; left:50%; top:50%; width:80%; height:auto;
+  transform:translate(-50%,-50%); pointer-events:none; transition:opacity .9s ease;
+}
+.hero-3d.is-ready .hero-3d-fallback{ opacity:0; }
+@keyframes h3dReveal{
+  0%  { opacity:0; filter:blur(24px); transform:scale(.94); }
+  100%{ opacity:1; filter:none;       transform:scale(1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-content h1 .hero-3d{ animation:none; }
+  .hero-3d.is-ready canvas{ animation:none; opacity:1; }
+}
+</style>
 </head>
 <body>
 
@@ -2098,20 +2124,9 @@
 <section class="hero" style="border-top:none; padding-top:140px;">
   <div class="orbit" id="orbit"></div>
   <div class="hero-content">
-    <h1><span class="hero-logo-wrap"><span class="logo-stage">
-      <span class="logo-slide is-current">
-        <img class="ls-sharp" src="Logo-port.png" alt="Glow In The Dark" fetchpriority="high" decoding="async">
-        <span class="ls-blur" aria-hidden="true"><img src="Logo-port.png" alt="" decoding="async"></span>
-      </span>
-      <span class="logo-slide">
-        <img class="ls-sharp" src="Logo-port01.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
-        <span class="ls-blur" aria-hidden="true"><img src="Logo-port01.png" alt="" fetchpriority="low" decoding="async"></span>
-      </span>
-      <span class="logo-slide">
-        <img class="ls-sharp" src="Logo-port02.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
-        <span class="ls-blur" aria-hidden="true"><img src="Logo-port02.png" alt="" fetchpriority="low" decoding="async"></span>
-      </span>
-    </span></span></h1>
+    <h1><span class="hero-3d" id="hero3d" role="img" aria-label="Portfolio">
+      <img class="hero-3d-fallback" src="Logo-port.png" alt="Portfolio" decoding="async">
+    </span></h1>
   </div>
 </section>
 
@@ -3848,5 +3863,115 @@ document.addEventListener("click", (e) => {
 })();
 </script>
 
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+/* =========================================================
+   HERO LOGO 3D — kéo chuột / vuốt ngang để xoay, thả ra thì
+   tự lắc nhẹ trở lại. Nếu lỗi WebGL, logo PNG cũ vẫn hiện.
+   ========================================================= */
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const MODEL_URL = 'models/portfolio.glb';   // đường dẫn file GLB (tính từ index.html)
+const HDR_URL   = '';                       // tuỳ chọn: 'models/studio.hdr' để phản chiếu đẹp hơn
+const SWAY      = 0.55;                     // biên độ lắc (radian, ~31°)
+const SWAY_SPEED= 0.7;                      // tốc độ lắc
+const FILL      = 0.8;                      // chữ chiếm bao nhiêu % chiều ngang khung
+
+const box = document.getElementById('hero3d');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (box) start().catch(err => console.warn('Hero 3D lỗi, dùng logo PNG:', err));
+
+async function start(){
+  const canvas = document.createElement('canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 2.4, 0.01, 100);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  if (HDR_URL){
+    const { RGBELoader } = await import('three/addons/loaders/RGBELoader.js');
+    new RGBELoader().load(HDR_URL, tex => {
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      scene.environment = pmrem.fromEquirectangular(tex).texture;
+    });
+  }
+
+  const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
+  const model = gltf.scene;
+  const bb = new THREE.Box3().setFromObject(model);
+  const size = bb.getSize(new THREE.Vector3());
+  model.position.sub(bb.getCenter(new THREE.Vector3()));
+  const pivot = new THREE.Group(); pivot.add(model); scene.add(pivot);
+
+  const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    const m = o.material;
+    ['map','normalMap','metalnessMap','roughnessMap'].forEach(k => { if (m[k]) m[k].anisotropy = aniso; });
+  });
+
+  function resize(){
+    const w = box.clientWidth, h = box.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    const t = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const dW = (size.x / FILL / 2) / (t * camera.aspect);
+    const dH = (size.y / 0.7 / 2) / t;
+    camera.position.set(0, 0, Math.max(dW, dH) + size.z);
+    camera.lookAt(0, 0, 0);
+  }
+  box.appendChild(canvas);
+  new ResizeObserver(resize).observe(box);
+  resize();
+
+  // ---- kéo để xoay ----
+  let rotY = 0, vel = 0, dragging = false, lastX = 0, idleAt = 0;
+  const norm = a => Math.atan2(Math.sin(a), Math.cos(a));
+  box.addEventListener('pointerdown', e => {
+    dragging = true; lastX = e.clientX; vel = 0;
+    box.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX; lastX = e.clientX;
+    rotY += dx * 0.01; vel = dx * 0.01;
+  });
+  const end = () => { dragging = false; idleAt = performance.now() / 1000; };
+  box.addEventListener('pointerup', end);
+  box.addEventListener('pointercancel', end);
+
+  // ---- vòng lặp (dừng khi hero ra khỏi màn hình hoặc tab ẩn) ----
+  let visible = true;
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(box);
+  renderer.setAnimationLoop(() => {
+    if (!visible || document.hidden) return;
+    const now = performance.now() / 1000;
+    if (!dragging){
+      if (Math.abs(vel) > 0.0002){ rotY += vel; vel *= 0.94; idleAt = now; }
+      else if (now - idleAt > 2.2){
+        rotY = norm(rotY);
+        const target = reduce ? 0 : Math.sin(now * SWAY_SPEED) * SWAY;
+        rotY += (target - rotY) * 0.04;
+      }
+    }
+    pivot.rotation.y = rotY;
+    renderer.render(scene, camera);
+  });
+
+  box.classList.add('is-ready');
+}
+</script>
 </body>
 </html>
