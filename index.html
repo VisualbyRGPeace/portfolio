@@ -3877,6 +3877,8 @@ document.addEventListener("click", (e) => {
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const MODEL_URL = 'models/portfolio.glb';   // đường dẫn file GLB (tính từ index.html)
 const HDR_URL   = '';                       // tuỳ chọn: 'models/studio.hdr' để phản chiếu đẹp hơn
@@ -3886,7 +3888,9 @@ const FILL      = 0.8;                      // chữ chiếm bao nhiêu % chiề
 
 const box = document.getElementById('hero3d');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (box) start().catch(err => console.warn('Hero 3D lỗi, dùng logo PNG:', err));
+if (location.protocol === 'file:')
+  console.warn('[Hero 3D] Bạn đang mở bằng file:// nên trình duyệt chặn tải .glb. Hãy chạy qua server (vd: python -m http.server) hoặc đưa lên hosting.');
+if (box) start().catch(err => console.error('[Hero 3D] Lỗi tải model, đang dùng logo PNG:', err));
 
 async function start(){
   const canvas = document.createElement('canvas');
@@ -3907,10 +3911,20 @@ async function start(){
     });
   }
 
-  const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
+  // đèn bổ sung: model màu tối / không metal vẫn nhìn thấy trên nền đen
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x556070, 1.1));
+  const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(2, 3, 5); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xbcd2ff, 1.4); rim.position.set(-4, 1, -3); scene.add(rim);
+
+  // hỗ trợ file GLB nén Draco / Meshopt (xuất từ Blender với "Compression")
+  const draco = new DRACOLoader().setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+  const loader = new GLTFLoader().setDRACOLoader(draco).setMeshoptDecoder(MeshoptDecoder);
+  const gltf = await loader.loadAsync(MODEL_URL);
   const model = gltf.scene;
   const bb = new THREE.Box3().setFromObject(model);
   const size = bb.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  camera.near = maxDim / 100; camera.far = maxDim * 200;   // model to/nhỏ cỡ nào cũng không bị cắt mất
   model.position.sub(bb.getCenter(new THREE.Vector3()));
   const pivot = new THREE.Group(); pivot.add(model); scene.add(pivot);
 
@@ -3931,6 +3945,7 @@ async function start(){
     const dH = (size.y / 0.7 / 2) / t;
     camera.position.set(0, 0, Math.max(dW, dH) + size.z);
     camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
   }
   box.appendChild(canvas);
   new ResizeObserver(resize).observe(box);
